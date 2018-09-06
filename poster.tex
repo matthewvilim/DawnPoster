@@ -20,6 +20,7 @@
 \usepackage{authblk}
 \usepackage{tcolorbox}
 \usepackage{lettrine}
+\usepackage{booktabs}
 
 \pagestyle{fancy}
 \pagenumbering{gobble}
@@ -53,7 +54,7 @@
 \end{tcolorbox}
 
 \begin{tcolorbox}[title=Mining Background]
-\lettrine{T}{he} Bitcoin mining process is summarized in Figure \ref{mining_process}. Mining consists of searching for a cryptographic \emph{nonce} value within a block such that the hash of the block falls within a certain range.
+\lettrine{T}{he} Bitcoin mining process is summarized in Figure. Mining consists of searching for a cryptographic \emph{nonce} value within a block such that the hash of the block falls within a certain range.
 \end{tcolorbox}
 
 \begin{figure}[H]
@@ -78,10 +79,38 @@
 \end{figure}
 
 \begin{figure}[H]
+\caption{Area and power scaling of switch parameters}
+\label{fig:switch}
+\centering
+\includegraphics[width=1\linewidth]{figs/switch.pdf}
+\end{figure}
+
+\begin{table}
+\centering
+\footnotesize
+  \begin{tabular*}{\columnwidth}{>{\centering\arraybackslash}m{1.25cm}|>{\centering\arraybackslash}m{1.75cm}|>{\centering\arraybackslash}m{1.75cm}|>{\centering\arraybackslash}m{1.75cm}}
+    \bottomrule
+   % Flit Width & 
+    \#VC & Per VC Buffer Depth & Area ($um^2$) & Energy($fJ$/bit) \\\hline
+    \input{text/router.tex}
+    \bottomrule
+  \end{tabular*}
+  \caption{Router area and per-bit energy}
+  \label{tab:router}
+\end{table}
+
+\begin{figure}[H]
 \caption{Area overheads for network architectures}
 \label{fig:area}
 \centering
 \includegraphics[width=1\linewidth]{figs/area.pdf}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Performance evaluation of network architectures}
+\label{fig:slow_down}
+\centering
+\includegraphics[width=1\linewidth]{figs/slow_down.pdf}
 \end{figure}
 
 \begin{tcolorbox}
@@ -189,7 +218,7 @@ E_i(f) = E_f + E_o(f) \qquad E(f) = 1 - [1 - E_i(f)]^2
 \end{tcolorbox}
 
 \begin{tcolorbox}[title=Results]
-\lettrine{T}{able} \ref{table:adders} lists the adders' delay and area. Each adder was inserted into the hashing core pipelines in the CPA slots indicated in Figure \ref{fig:sha256_datapath}. The resulting hashing core area and delay are provided in Table \ref{table:pipeline}. Approximate variants are highlighted in gray. Figure \ref{fig:freq_scaling} shows the error rate-frequency characteristic $E_i(f)$ of each hashing core for various adders after simulating a full round of SHA-256. The resulting frequency-profit relation is shown in Figure \ref{fig:profit_freq}.
+\lettrine{T}{able} \ref{table:router} lists the adders' delay and area. Each adder was inserted into the hashing core pipelines in the CPA slots indicated in Figure \ref{fig:sha256_datapath}. The resulting hashing core area and delay are provided in Table \ref{table:pipeline}. Approximate variants are highlighted in gray. Figure \ref{fig:freq_scaling} shows the error rate-frequency characteristic $E_i(f)$ of each hashing core for various adders after simulating a full round of SHA-256. The resulting frequency-profit relation is shown in Figure \ref{fig:profit_freq}.
 \end{tcolorbox}
 
 \begin{table}[H]
