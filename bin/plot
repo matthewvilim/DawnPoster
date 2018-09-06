@@ -1,0 +1,961 @@
+#!/usr/bin/env python2
+
+from os import listdir
+from os.path import isfile, isdir, join, splitext, basename, dirname 
+from collections import OrderedDict
+from cycler import cycler
+import os
+import pickle
+import csv
+import argparse
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.ticker as ticker
+from matplotlib import mlab
+import os, sys
+import math
+import numpy as np
+import pandas as pd
+from summarize import *
+from itertools import groupby 
+
+def getcolors(name,num):
+    cmap = plt.cm.get_cmap(name,num)
+    return [cmap(i) for i in range(num)]
+
+def combo(list1,list2):
+    l1 = []
+    l2 = []
+    for e1 in list1:
+        for e2 in list2:
+            l1.append(e1)
+            l2.append(e2)
+    return l1,l2
+
+def plot_util_bw():
+    appnames = get_idx_value(summary["sim"], "appname")
+    fig, ax = plt.subplots()
+    plt.tight_layout()
+    width = 0.6
+    numbar = 3
+    barwidth = width / numbar
+    ind = np.arange(len(appnames)) + barwidth/2
+    ec = 'none'
+
+    p2p_tab = lookup(summary['sim'], **p2p_ideal)
+    dynamic_tab = lookup(summary['sim'], **D_v0_s0)
+
+    pcu      = get_col(dynamic_tab , 'pcu'      )
+    pmu_comp = get_col(dynamic_tab , "pmu-comp" )
+    pmu_mem  = get_col(dynamic_tab , "pmu-mem"  )
+    loadbw   = get_col(p2p_tab , "loadbw"   )
+    storebw  = get_col(p2p_tab , "storebw"  )
+
+    ax.yaxis.grid(color='gray', linestyle='dashed')
+    ax.bar(ind + 0*width/numbar , pcu , barwidth , edgecolor=ec, color='r', hatch='\\\\', label='PCU')
+    ax.bar(ind + 1*width/numbar , pmu_mem+pmu_comp, barwidth , edgecolor=ec, color='gold', hatch='//', label='PMU (Compute)')
+    ax.bar(ind + 1*width/numbar , pmu_mem , barwidth , edgecolor=ec, color='gold',label='PMU (Scratchpad)')
+    ax.bar(ind + 2*width/numbar , loadbw+storebw, barwidth , edgecolor=ec, color='dodgerblue', label='Dram Store Bandwith')
+    ax.bar(ind + 2*width/numbar , loadbw, barwidth , edgecolor=ec, color='forestgreen', label='Dram Load Bandwith')
+
+    xticks = range(len(appnames)+1)
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(appnames, rotation=40)
+    plt.xlabel('Benchmarks')
+    plt.ylabel('Percentage to Maximum')
+    ax.set_xlim(0,len(appnames))
+    ax.set_ylim(0,100)
+    ax.legend(loc=2, ncol=5, fontsize='x-small',bbox_to_anchor=(0.02, 1.08))
+    fig.set_size_inches(8,3)
+    plt.gcf().subplots_adjust(bottom=0.36, top=0.9)
+    plot_path = 'figs/util_bw.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def pct(a,b):
+    if a is None or b is None:
+        return 0
+    else:
+        return float(a) / float(b) * 100
+
+def slowdown(a,b):
+    if a is None or b is None:
+        return 0
+    else:
+        return float(a) / float(b)
+
+def geomean(l):
+    nl = np.array(l)
+    return nl.prod()**(1.0/len(nl))
+
+def plot_sim():
+    appnames = get_idx_value(summary["sim"], "appname")
+    cols = designs
+    labels = [netname(c) for c in cols] 
+    colors = getcolors("Paired", 11)[0:len(cols)]
+
+    fig, (ax1,ax2,ax3,ax4) = plt.subplots(4,1,sharex=True)
+    plt.tight_layout()
+    width = 0.8
+    maxY = 2
+    numbar = len(cols)
+    barwidth = float(width) / numbar
+    inds = np.array(range(len(appnames)+1)) + barwidth/2
+    xticks = np.array(range(len(appnames)+1)) + width / 2
+
+    def text_over_max(ax, inds, i, y, maxY):
+        for ind,yy in zip(inds,y):
+            if yy > maxY:
+                ax.text(ind+i*barwidth-barwidth/2, maxY+0.1, round(yy, ndigits=1), 
+                        color='k', size='x-small')
+
+    sds = []
+    p2p_cycles = get_col(summary['sim'], 'cycle', **p2p_ideal)
+    for i,c in enumerate(cols):
+        c_cycles = get_col(summary['sim'], "cycle", **c)
+        sds.append(np.vectorize(slowdown)(c_cycles,p2p_cycles))
+
+    ax1.set_axisbelow(True)
+    ax1.yaxis.grid(color='gray', linestyle='dashed')
+    for i,c in enumerate(cols):
+        y = sds[i]
+        y = np.append(y, geomean(y))
+        # if c == D_v1_s4: print(y)
+        ax1.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
+        text_over_max(ax1, inds, i, y, maxY)
+    ax1.set_xticks(xticks)
+    ax1.set_ylabel('(a)\nSlow down compared \nto ideal newtork')
+    ax1.set_xlim(0,len(appnames)+1)
+    ax1.set_ylim(0,maxY)
+    ax1.legend(loc=2, ncol=4, fontsize='x-small')
+
+    ax2.set_axisbelow(True)
+    ax2.yaxis.grid(color='gray', linestyle='dashed')
+    v2_s4_area = get_col_value(summary['area'], 'total_area', **v2_s4)
+    for i,c in enumerate(cols):
+        c_area = get_col_value(summary['area'], 'total_area', **c)
+        y = sds[i] * (c_area / v2_s4_area)
+        y = np.append(y, geomean(y))
+        # if c == D_v1_s4: print(c_area / v2_s4_area)
+        ax2.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
+        text_over_max(ax2, inds, i, y, maxY)
+    ax2.set_xticks(xticks)
+    ax2.set_ylabel('(b)\nSlow down\n (Normallized by \nTotal Area)')
+    ax2.set_xlim(0,len(appnames)+1)
+    ax2.set_ylim(0,maxY)
+
+    ax3.set_axisbelow(True)
+    ax3.yaxis.grid(color='gray', linestyle='dashed')
+    hatches = {'total_router_energy': '//', 'total_vswitch_energy':'', 'total_sswitch_energy':'\\\\'}
+    v2_s4_energy = get_col(summary['energy'], 'total_net_energy', **v2_s4)
+    for i,c in enumerate(cols):
+        bottom = np.zeros(len(appnames)+1)
+        for e in ['total_vswitch_energy', 'total_sswitch_energy', 'total_router_energy']:
+            y = get_col(summary['energy'], e, **c) * 1.0 / v2_s4_energy
+            y = np.append(y, geomean(y))
+            ax3.bar(inds+i*barwidth, y, bottom=bottom, width=barwidth, edgecolor='none',
+                    color=colors[i], hatch=hatches[e])
+            bottom += y
+        text_over_max(ax3, inds, i, y, maxY)
+    ax3.set_xticks(xticks)
+    ax3.set_xlabel('Benchmarks')
+    ax3.set_ylabel('(c)\nNormalized \nNetwork Energy \nto v2-s4-db')
+    ax3.set_xticklabels(appnames, rotation=40)
+    ax3.set_xlim(0,len(appnames)+1)
+    ax3.set_ylim(0,maxY)
+    # fake customized labels
+    energy_labels = {'total_router_energy': 'total_router energy', 'total_vswitch_energy':'vector switch energy',
+            'total_sswitch_energy':'scalar switch energy'}
+    for e in hatches:
+        ax3.bar(inds+i*barwidth, [0]*len(inds), width=barwidth, edgecolor='k',color='w',
+                label=energy_labels[e], hatch=hatches[e])
+    ax3.legend(loc=2, ncol=3, fontsize='x-small')
+
+    # ax4.set_axisbelow(True)
+    # ax4.yaxis.grid(color='gray', linestyle='dashed')
+    # v2_s4_energy = get_col(summary['energy'], 'total_net_energy', **v2_s4)
+    # for i,c in enumerate(cols):
+        # c_cycles = get_col(summary['sim'], "cycle", **c)
+        # c_energy = get_col(summary['energy'], 'total_net_energy', **c)
+        # y = sds[i] * (c_energy / v2_s4_energy)
+        # y = np.append(y, geomean(y))
+        # ax2.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
+        # ax4.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
+        # text_over_max(ax4, inds, i, y, maxY)
+    # ax4.set_xticks(xticks)
+    # ax4.set_xlabel('Benchmarks')
+    # ax4.set_ylabel('(d)\nSlow down\n (Normallized by \nNetwork Energy)')
+    # ax4.set_xticklabels(np.append(appnames, 'Geometric Mean'), rotation=40)
+    # ax4.set_xlim(0,len(appnames)+1)
+    # ax4.set_ylim(0,maxY)
+
+    ax4.set_axisbelow(True)
+    ax4.yaxis.grid(color='gray', linestyle='dashed')
+    hatches = {'total_router_energy': '//', 'total_vswitch_energy':'', 'total_sswitch_energy':'\\\\'}
+    v2_s4_power = get_col(summary['energy'], 'total_net_energy', **v2_s4) * 1e9 / get_col(summary['sim'], 'cycle', **v2_s4)
+    for i,c in enumerate(cols):
+        bottom = np.zeros(len(appnames)+1)
+        for e in ['total_vswitch_energy', 'total_sswitch_energy', 'total_router_energy']:
+            c_power = get_col(summary['energy'], e, **c) * 1e9 / get_col(summary['sim'], 'cycle', **c)
+            y = c_power / v2_s4_power
+            y = np.append(y, geomean(y))
+            ax4.bar(inds+i*barwidth, y, bottom=bottom, width=barwidth, edgecolor='none',
+                    color=colors[i], hatch=hatches[e])
+            bottom += y
+        text_over_max(ax4, inds, i, y, maxY)
+        if c == v2_s4:
+            total_energy = get_col(summary['energy'], 'total_net_energy', **c)
+            total_power = get_col(summary['energy'], 'total_net_power', **c)
+            for ind,yy in zip(inds,total_power):
+                ax4.text(ind+i*barwidth-barwidth/2, 1.2, '{} W'.format(round(yy, ndigits=2)), color='k', size='x-small')
+    ax4.set_xticks(xticks)
+    ax4.set_xlabel('Benchmarks')
+    ax4.set_ylabel('(d)\nNormalized \nNetwork Power \nto v2-s4-db')
+    ax4.set_xticklabels(np.append(appnames, 'Geometric Mean'), rotation=40)
+    ax4.set_xlim(0,len(appnames)+1)
+    ax4.set_ylim(0,maxY)
+    # fake customized labels
+    power_labels = {'total_router_energy': 'total_router power', 'total_vswitch_energy':'vector switch power',
+            'total_sswitch_energy':'scalar switch power'}
+    for e in hatches:
+        ax4.bar(inds+i*barwidth, [0]*len(inds), width=barwidth, edgecolor='k',color='w',
+                label=power_labels[e], hatch=hatches[e])
+    ax4.legend(loc=2, ncol=3, fontsize='x-small')
+
+    plt.gcf().subplots_adjust(bottom=0.15)
+    fig.set_size_inches(16,8)
+    plot_path = 'figs/slow_down.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def plot_vc():
+    appnames = get_idx_value(summary["sim"], "appname")
+    cols = [ d for d in designs if d['net']=='dynamic']
+    labels = [netname(c) for c in cols]
+    colors = getcolors("Paired", 8)[0:len(cols)]
+
+    fig, ax = plt.subplots()
+    plt.tight_layout()
+    width = 0.6
+    maxY = 6
+    numbar = len(cols)
+    barwidth = float(width) / numbar
+    inds = np.array(range(len(appnames))) + barwidth/2
+    xticks = np.array(range(len(appnames))) + width / 2
+    # ax.plot(xticks, [1]*(len(appnames)+1),'k--') # draw a line at 1
+    ax.set_axisbelow(True)
+    ax.yaxis.grid(color='gray', linestyle='dashed')
+    for i,c in enumerate(cols):
+        vc = get_col(summary['sim'], 'vc', **c)
+        vcs = get_col(summary['sim'], "vc", **c)
+        ax.bar(inds+i*barwidth, vcs, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(appnames, rotation=40)
+    plt.xlabel('Benchmarks')
+    plt.ylabel('Number of VC')
+    ax.set_xlim(0,len(appnames))
+    ax.set_ylim(0,maxY)
+    ax.legend(loc=2, ncol=3, fontsize='x-small')
+    plt.gcf().subplots_adjust(bottom=0.2)
+    fig.set_size_inches(8,4)
+    plot_path = 'figs/vc.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def plot_vc_area():
+    appnames = get_idx_value(summary["sim"], "appname")
+    cols = [ d for d in designs if d['net']=='dynamic']
+    labels = [netname(c) for c in cols]
+    colors = getcolors("Paired", 8)[0:len(cols)]
+
+    fig, (ax1,ax2) = plt.subplots(1,2)
+    plt.tight_layout()
+    width = 0.6
+    maxY = 7
+    numbar = len(cols)
+    barwidth = float(width) / numbar
+    inds = np.array(range(len(appnames))) + barwidth/2
+    xticks = np.array(range(len(appnames))) + width / 2
+    # ax.plot(xticks, [1]*(len(appnames)+1),'k--') # draw a line at 1
+    ax1.set_axisbelow(True)
+    ax1.yaxis.grid(color='gray', linestyle='dashed')
+    for i,c in enumerate(cols):
+        vc = get_col(summary['sim'], 'vc', **c)
+        vcs = get_col(summary['sim'], "vc", **c)
+        ax1.bar(inds+i*barwidth, vcs, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
+    ax1.set_xticks(xticks)
+    ax1.set_xticklabels(appnames, rotation=60)
+    ax1.set_xlabel('Benchmarks')
+    ax1.set_ylabel('(a) Number of VC')
+    ax1.set_xlim(0,len(appnames))
+    ax1.set_ylim(0,maxY)
+    ax1.legend(loc=2, ncol=2, fontsize='small')
+    # plt.gcf().subplots_adjust(bottom=0.2)
+    # fig.set_size_inches(8,4)
+    # plot_path = 'figs/vc.pdf'
+    # plt.savefig(plot_path, format='pdf', dpi=900)
+
+    colors = getcolors("Paired", 8)[0:5]
+    tps = ['total_pcu_area', 'total_pmu_area', 'total_router_area', 'total_vswitch_area',
+            'total_sswitch_area'] 
+    cols = [d for d in designs if d['net'] not in ["p2p", "asic"]]
+    names = [netname(col) for col in cols]
+
+    barwidth = 0.4
+    inds = np.array(range(len(cols)))
+    ax2.set_axisbelow(True)
+    ax2.yaxis.grid(color='gray', linestyle='dashed')
+    ax2.set_prop_cycle(cycler('color', colors))
+
+    bottom = np.zeros(len(cols))
+    for tp in tps:
+        areas = []
+        for col in cols:
+            areas.append(get_col_value(summary['area'] / 1e6, tp, **col))
+        areas = np.array(areas)
+        ax2.bar(inds, np.array(areas), bottom=bottom, width=barwidth, edgecolor='none',
+                label=tp.replace("total_",""))
+        bottom += areas 
+
+    ax2.set_xticks(inds)
+    ax2.set_xticklabels(names, rotation=40)
+    ax2.set_xlabel('Network Architectures')
+    ax2.set_ylabel('(b) Area ($mm^2$)')
+    ax2.set_ylim(0,max(bottom)*1.2)
+    ax2.legend(loc=2, ncol=2, fontsize='small')
+    fig.set_size_inches(8,4)
+    plt.gcf().subplots_adjust(bottom=0.3)
+    plot_path = 'figs/area_vc.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def plot_link1():
+    appnames = get_idx_value(summary["sim"], "appname")
+    fig, (ax1, ax2) = plt.subplots(2,1, sharex=False)
+    plt.tight_layout()
+
+    colors = getcolors("tab20", 8)
+    linestyle = ['-','--']
+    cs, ls = combo(colors,linestyle)
+    cs = cs[0:len(appnames)]
+    ls = ls[0:len(appnames)]
+
+    # ax1.set_prop_cycle(cycler('color', cs) + cycler('linestyle', ls))
+    # for i, app in enumerate(summary['apps']):
+        # counts = np.array(summary['apps'][app]['link_count']).astype(float)
+        # total_counts = sum(counts)
+        # norm_counts = sorted(counts * 100.0 / total_counts, reverse=True)
+        # cdf = np.cumsum(norm_counts)
+        # xs = np.linspace(0,100,len(norm_counts))
+        # ax1.plot(xs, cdf, label=getname(app))
+    # ax1.legend(loc=4, ncol=3, fontsize='x-small')
+    # ax1.set_xlim(0,100)
+    # ax1.set_ylim(0,100)
+    # ax1.set_ylabel("CDF of Link Activation Count (%)")
+
+    # summary['link_count'][app][tp]
+    # tp 2 vector 1 scalar 0 control
+
+    ax1.set_prop_cycle(cycler('color', cs) + cycler('linestyle', ls))
+    for i, app in enumerate(summary['link_count']):
+        tab = lookup(summary['sim'], **p2p_ideal)
+        p2p_cycles = get_col_value(tab, 'cycle', app=app) # runtime
+        counts = np.array(summary['link_count'][app][2] + summary['link_count'][app][1] + summary['link_count'][app][0]).astype(float)
+        # counts = np.array(summary['link_count'][app][2]).astype(float)
+        rate = sorted(counts * 100.0 / p2p_cycles, reverse=True)
+        xs = np.linspace(0,100,len(rate))
+        ax1.plot(xs, rate, label=getname(app))
+    ax1.legend(loc=1, ncol=3, fontsize='x-small')
+    ax1.set_xlim(0,100)
+    ax1.set_ylim(0,100)
+    ax1.set_ylabel("Distribution of Link Activation Rate")
+    ax1.set_xlabel("Percentage of Links")
+
+    ax1.set_prop_cycle(cycler('color', cs) + cycler('linestyle', ls))
+
+    ax2.set_prop_cycle(cycler('color', cs) + cycler('linestyle', ls))
+    for i, app in enumerate(summary['multicast']):
+        multicasts = np.array(summary['multicast'][app][2]).astype(float)
+        multicasts = sorted(multicasts, reverse=True)
+        xs = np.linspace(0,100,len(multicasts))
+        ax2.plot(xs, multicasts, label=getname(app))
+    ax2.legend(loc=1, ncol=3, fontsize='x-small')
+    ax2.set_xlim(0,30)
+    # ax2.set_ylim(0,100)
+    ax2.set_ylabel("Distribution of Link Fanout")
+    ax2.set_xlabel("Percentage of Links")
+
+    plt.gcf().subplots_adjust(left=0.1)
+    fig.set_size_inches(6,6)
+    plot_path = 'figs/link1.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def plot_link2():
+    appnames = get_idx_value(summary["sim"], "appname")
+    fig, (ax1, ax2) = plt.subplots(2,1, sharex=False)
+    plt.tight_layout()
+
+    colors = getcolors("tab20", 8)
+    linestyle = ['-','--']
+    cs, ls = combo(colors,linestyle)
+    cs = cs[0:len(appnames)]
+    ls = ls[0:len(appnames)]
+
+    bin_size = 10
+    def to_bin(rate):
+        return np.ceil(rate / bin_size) * bin_size
+        
+    colors = getcolors("tab20", len(summary['link_count']))
+    for i, app in enumerate(summary['link_count']):
+        tab = lookup(summary['sim'], **p2p_ideal)
+        p2p_cycles = get_col_value(tab, 'cycle', app=app)
+        vec_rate = np.array([] + summary['link_count'][app][2]).astype(float) * 100.0 / p2p_cycles
+        vec_rate = sorted(to_bin(vec_rate))
+        scal_rate = np.array(summary['link_count'][app][1] + summary['link_count'][app][0]).astype(float) * 100.0 / p2p_cycles
+        scal_rate = sorted(to_bin(scal_rate))
+        total_link = len(vec_rate) + len(scal_rate)
+        vec_groups = [(key,len(list(group)) * 100.0/total_link) for key, group in groupby(vec_rate)]
+        scal_groups = [(key,len(list(group)) * 100.0/total_link) for key, group in groupby(scal_rate)]
+        scal_x = np.array([k for k,v in scal_groups])
+        scal_y = np.array([v for k,v in scal_groups])
+        vec_x = np.array([k for k,v in vec_groups])
+        vec_y = np.array([v for k,v in vec_groups])
+        ax1.scatter(scal_x-1, scal_y, label=getname(app), facecolor=colors[i], color='none',
+                alpha=0.8, s=20, marker='^')
+        ax1.scatter(vec_x+1, vec_y, facecolor=colors[i], color='none', alpha=0.8, s=40, marker='o')
+    ax1.set_axisbelow(True)
+    ax1.yaxis.grid(color='gray', linestyle='dashed')
+    ax1.legend(loc=1, ncol=5, fontsize='x-small')
+    # ax1.set_xlim(0,100)
+    ax1.set_ylim(0,100)
+    ax1.set_xticks(range(bin_size,100+bin_size,bin_size))
+    xtickslabels = ['{}-{}'.format(i,i+bin_size) for i in range(0,100, bin_size)]
+    ax1.set_xticklabels(xtickslabels)
+    ax1.set_xlabel("Link Activation Rate")
+    ax1.set_ylabel("Percentage of Links")
+
+    # ax2.set_prop_cycle(cycler('color', cs) + cycler('linestyle', ls))
+    # for i, app in enumerate(summary['multicast']):
+        # multicasts = np.array(summary['multicast'][app][2]).astype(float)
+        # multicasts = sorted(multicasts, reverse=True)
+        # xs = np.linspace(0,100,len(multicasts))
+        # ax2.plot(xs, multicasts, label=getname(app))
+    # ax2.legend(loc=1, ncol=3, fontsize='x-small')
+    # ax2.set_xlim(0,30)
+    # # ax2.set_ylim(0,100)
+    # ax2.set_ylabel("Distribution of Link Fanout")
+    # ax2.set_xlabel("Percentage of Links")
+
+    plt.gcf().subplots_adjust(left=0.1)
+    fig.set_size_inches(6,6)
+    plot_path = 'figs/link2.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def plot_link3():
+    appnames = get_idx_value(summary["sim"], "appname")
+    fig, (ax1, ax2) = plt.subplots(2,1, sharex=True)
+    plt.tight_layout()
+
+    colors = getcolors("tab20", 8)
+    linestyle = ['-','--']
+    cs, ls = combo(colors,linestyle)
+    cs = cs[0:len(appnames)]
+    ls = ls[0:len(appnames)]
+
+    colors = getcolors("tab20", len(summary['link_count']))
+    for i, app in enumerate(summary['link_count']):
+        tab = lookup(summary['sim'], **p2p_ideal)
+        p2p_cycles = get_col_value(tab, 'cycle', app=app)
+        vec_rate = sorted(np.array([] + summary['link_count'][app][2]).astype(float) * 100.0 / p2p_cycles, reverse=True)
+        scal_rate = sorted(np.array(summary['link_count'][app][1] + summary['link_count'][app][0]).astype(float) * 100.0 / p2p_cycles, reverse=False)
+        vec_rate.append(scal_rate[0])
+        vec_max = len(vec_rate) * 100 / (len(vec_rate) + len(scal_rate))
+        xs = np.linspace(0,vec_max,len(vec_rate))
+        ax1.plot(xs, vec_rate, color=colors[i], linestyle='-', linewidth=2,
+                alpha=0.6, label=getname(app))
+        xs = np.linspace(vec_max,100,len(scal_rate))
+        ax1.plot(xs, scal_rate, color=colors[i], linestyle='-', linewidth=1, alpha=0.6)
+
+    ax1.set_xlim(0,100)
+    ax1.set_ylim(0,100)
+    ax1.set_ylabel("Distribution of Link Activation Rate")
+
+    ax2.set_prop_cycle(cycler('color', cs) + cycler('linestyle', ls))
+    for i, app in enumerate(summary['multicast']):
+        multi_vec = sorted(np.array([] + summary['multicast'][app][2]), reverse=True)
+        multi_scal = sorted(np.array(summary['multicast'][app][1] +
+            summary['multicast'][app][0]), reverse=False)
+        vec_max = len(multi_vec) * 100 / (len(multi_vec) + len(multi_scal))
+        xs = np.linspace(0,vec_max,len(multi_vec))
+        ax2.plot(xs, multi_vec, label=getname(app), alpha=0.6, linestyle='-', linewidth=2)
+        xs = np.linspace(vec_max,100,len(multi_scal))
+        ax2.plot(xs, multi_scal, alpha=0.6, linestyle='-', linewidth=1)
+    # ax2.legend(loc=1, ncol=3, fontsize='x-small')
+    ax2.set_xlim(0,100)
+    ax2.set_ylim(0,40)
+    ax2.set_ylabel("Distribution of Link Fanout")
+    ax2.set_xlabel("Percentage of Links")
+
+    ax2.plot(xs, [-1]*len(scal_rate), color='k', linestyle='-', linewidth=2, alpha=0.8,
+            label='vector links')
+    ax2.plot(xs, [-1]*len(scal_rate), color='k', linestyle='-', linewidth=1, alpha=0.6,
+            label='scalar links')
+    ax2.legend(loc=1, ncol=5, fontsize='x-small')
+
+    plt.gcf().subplots_adjust(left=0.1)
+    fig.set_size_inches(6,6)
+    plot_path = 'figs/link3.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def plot_link4():
+    appnames = get_idx_value(summary["sim"], "appname")
+    fig, ax1 = plt.subplots()
+    plt.tight_layout()
+
+    colors = getcolors("tab20", 8)
+    linestyle = ['-','--']
+    cs, ls = combo(colors,linestyle)
+    cs = cs[0:len(appnames)]
+    ls = ls[0:len(appnames)]
+
+    colors = getcolors("tab20", len(summary['link_count']))
+    for i, app in enumerate(summary['link_count']):
+        tab = lookup(summary['sim'], **p2p_ideal)
+        p2p_cycles = get_col_value(tab, 'cycle', app=app)
+
+        vec_rate = sorted(np.array([] + summary['link_count'][app][2]).astype(float) * 100.0 / p2p_cycles, reverse=True)
+        scal_rate = sorted(np.array(summary['link_count'][app][1] + summary['link_count'][app][0]).astype(float) * 100.0 / p2p_cycles, reverse=False)
+        multi_vec = sorted(np.array([] + summary['multicast'][app][2]), reverse=True)
+        multi_scal = sorted(np.array(summary['multicast'][app][1] +
+            summary['multicast'][app][0]), reverse=False)
+
+        ax1.scatter(vec_rate, multi_vec,   color='none', facecolor=colors[i], alpha=0.6, label=getname(app))
+        ax1.scatter(scal_rate, multi_scal, color='none', facecolor=colors[i], alpha=0.6, label=getname(app),s=10)
+
+    ax1.set_xlim(0,100)
+    ax1.set_ylim(0,40)
+    ax1.set_ylabel("Link Fanout")
+    ax1.set_xlabel("Link Activation Rate")
+
+    # ax2.plot(xs, [-1]*len(scal_rate), color='k', linestyle='-', linewidth=2, alpha=0.8,
+            # label='vector links')
+    # ax2.plot(xs, [-1]*len(scal_rate), color='k', linestyle='-', linewidth=1, alpha=0.6,
+            # label='scalar links')
+    ax1.legend(loc=1, ncol=5, fontsize='x-small')
+
+    plt.gcf().subplots_adjust(left=0.1, bottom=0.15)
+    fig.set_size_inches(6,4)
+    plot_path = 'figs/link4.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def plot_link5():
+    appnames = get_idx_value(summary["sim"], "appname")
+    fig, (ax1,ax2) = plt.subplots(1, 2, sharey=True)
+    plt.tight_layout()
+
+    colors = getcolors("tab20", 8)
+    linestyle = ['-','--']
+    cs, ls = combo(colors,linestyle)
+    cs = cs[0:len(appnames)]
+    ls = ls[0:len(appnames)]
+
+    y_max = 300
+    step = y_max/(2*len(appnames))
+
+    data=[]
+    y_labels = []
+
+    x_values = np.linspace(0,100,10)
+    y_ticks  = np.arange(len(appnames))
+
+    usage_colors = getcolors("tab20", len(appnames))
+    for i, app in enumerate(summary['link_count']):
+        tab = lookup(summary['sim'], **p2p_ideal)
+        p2p_cycles = get_col_value(tab, 'cycle', app=app)
+        counts_vector = np.array(summary['link_count'][app][2]).astype(float)
+        rate_vector = sorted(counts_vector * 100.0 / p2p_cycles, reverse=True)
+
+        counts_scalar = np.array(summary['link_count'][app][1] + summary['link_count'][app][0]).astype(float)
+        rate_scalar = sorted(counts_scalar * 100.0 / p2p_cycles, reverse=True)
+
+        # rate = rate_vector + rate_scalar
+        rate = rate_vector + [-r for r in rate_scalar]
+        xs = np.linspace(0, 100, len(rate))
+
+        y_labels.append(getname(app))
+        rate_interp = np.interp(x_values, xs, rate)
+        data.append(rate_interp)
+    ax1.set_xlabel("Percentage of Links")
+
+    # ax1.set_yticks(y_ticks)
+    # ax1.set_yticklabels(y_labels)
+    # ax1.set_xlim(0,100)
+    # #ax1.set_ylim(0,step*(len(appnames)+1))
+    # ax1.set_xlabel("Percentage of Links")
+
+    # im = ax1.imshow(data, cmap=plt.get_cmap('Oranges'), aspect='auto')
+    # cbar = ax1.figure.colorbar(im, ax=ax1)
+    # cbar.ax.set_ylabel('Activation Rate', rotation=-90, va="bottom")
+
+    # data = np.random.randn(6, 6)
+    # y = ["Prod. {}".format(i) for i in range(10, 70, 10)]
+    data = np.array(data)
+    
+    nbin = 10
+    norm = matplotlib.colors.BoundaryNorm(range(-100,100,200/nbin), nbin)
+    fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
+    
+    im, _ = heatmap(data, row_labels=y_labels, col_labels=range(10,110,10), 
+            ax=ax1,
+            cmap=plt.get_cmap("PiYG", nbin), norm=norm,
+            cbar_kw=dict(ticks=np.linspace(-100, 100, nbin+1), format=fmt),
+            cbarlabel="(a) Activation Rate"
+            )
+    
+    fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
+    annotate_heatmap(im, valfmt=fmt, size=5, fontweight="bold", textcolors=["red", "black"])
+
+    data = []
+    y_labels = []
+    ax2.set_prop_cycle(cycler('color', cs) + cycler('linestyle', ls))
+    for i, app in enumerate(summary['multicast']):
+        multi_vec = sorted(np.array([] + summary['multicast'][app][2]), reverse=True)
+        multi_scal = sorted(np.array(summary['multicast'][app][1] +
+            summary['multicast'][app][0]), reverse=True)
+
+        multi = multi_vec + [-m for m in multi_scal]
+        xs = np.linspace(0,100,len(multi))
+
+        y_labels.append(getname(app))
+        multi_interp = np.interp(x_values, xs, multi)
+        data.append(multi_interp)
+
+    # ax2.plot(xs, multicasts, label=getname(app))
+    # ax2.legend(loc=1, ncol=3, fontsize='x-small')
+    # ax2.set_xlim(0,30)
+    # # ax2.set_ylim(0,100)
+    # ax2.set_ylabel("Distribution of Link Fanout")
+    ax2.set_xlabel("Percentage of Links")
+
+    data = np.array(data)
+    
+    nbin = 11
+    norm = matplotlib.colors.BoundaryNorm(range(-30, 30, 60/nbin), nbin)
+    fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
+    
+    im, _ = heatmap(data, row_labels=None, col_labels=range(10,110,10), 
+            ax=ax2,
+            cmap=plt.get_cmap("PiYG", nbin+1), norm=norm,
+            cbar_kw=dict(ticks=np.linspace(-30, 30, nbin+1), format=fmt),
+            cbarlabel="(b) Link Fanout"
+            )
+    
+    fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
+    annotate_heatmap(im, valfmt=fmt, size=5, fontweight="bold", textcolors=["red", "black"])
+
+    plt.gcf().subplots_adjust(top=0.93, left=0.15, right=0.97)
+
+    fig.set_size_inches(8,4)
+    plot_path = 'figs/link5.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def heatmap(data, row_labels, col_labels, ax=None,
+            cbar_kw={}, cbarlabel="", **kwargs):
+    """
+    Create a heatmap from a numpy array and two lists of labels.
+
+    Arguments:
+        data       : A 2D numpy array of shape (N,M)
+        row_labels : A list or array of length N with the labels
+                     for the rows
+    Optional arguments:
+        ax         : A matplotlib.axes.Axes instance to which the heatmap
+                     is plotted. If not provided, use current axes or
+                     create a new one.
+        cbar_kw    : A dictionary with arguments to
+                     :meth:`matplotlib.Figure.colorbar`.
+        cbarlabel  : The label for the colorbar
+    All other arguments are directly passed on to the imshow call.
+    """
+
+    if not ax:
+        ax = plt.gca()
+
+    # Plot the heatmap
+    im = ax.imshow(data, **kwargs)
+
+    # Create colorbar
+    cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
+    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
+
+    # We want to show all ticks...
+    ax.set_xticks(np.arange(data.shape[1]))
+    ax.set_yticks(np.arange(data.shape[0]))
+    # ... and label them with the respective list entries.
+    if row_labels is not None: ax.set_yticklabels(row_labels)
+    ax.set_xticklabels(col_labels)
+    # ax.set_xlabel('Percentage of Links')
+
+    # Let the horizontal axes labeling appear on top.
+    ax.tick_params(top=True, bottom=False,
+                   labeltop=True, labelbottom=False)
+
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=-90, ha="right",
+             rotation_mode="anchor")
+
+    # Turn spines off and create white grid.
+    for edge, spine in ax.spines.items():
+        spine.set_visible(False)
+
+    ax.set_xticks(np.arange(data.shape[1]+1)-.5, minor=True)
+    ax.set_yticks(np.arange(data.shape[0]+1)-.5, minor=True)
+    ax.grid(which="minor", color="w", linestyle='-', linewidth=3)
+    ax.tick_params(which="minor", bottom=False, left=False)
+
+    return im, cbar
+
+
+def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
+                     textcolors=["black", "white"],
+                     threshold=None, **textkw):
+    """
+    A function to annotate a heatmap.
+
+    Arguments:
+        im         : The AxesImage to be labeled.
+    Optional arguments:
+        data       : Data used to annotate. If None, the image's data is used.
+        valfmt     : The format of the annotations inside the heatmap.
+                     This should either use the string format method, e.g.
+                     "$ {x:.2f}", or be a :class:`matplotlib.ticker.Formatter`.
+        textcolors : A list or array of two color specifications. The first is
+                     used for values below a threshold, the second for those
+                     above.
+        threshold  : Value in data units according to which the colors from
+                     textcolors are applied. If None (the default) uses the
+                     middle of the colormap as separation.
+
+    Further arguments are passed on to the created text labels.
+    """
+
+    if not isinstance(data, (list, np.ndarray)):
+        data = im.get_array()
+
+    # Normalize the threshold to the images color range.
+    if threshold is not None:
+        threshold = im.norm(threshold)
+    else:
+        threshold = im.norm(data.max())/2.
+
+    # Set default alignment to center, but allow it to be
+    # overwritten by textkw.
+    kw = dict(horizontalalignment="center",
+              verticalalignment="center")
+    kw.update(textkw)
+
+    # Get the formatter in case a string is supplied
+    if isinstance(valfmt, str):
+        valfmt = matplotlib.ticker.StrMethodFormatter(valfmt)
+
+    # Loop over the data and create a `Text` for each "pixel".
+    # Change the text's color depending on the data.
+    texts = []
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            kw.update(color=textcolors[im.norm(data[i, j]) > threshold])
+            text = im.axes.text(j, i, valfmt(data[i, j], None), **kw)
+            texts.append(text)
+
+    return texts
+
+def plot_switch():
+    fig, (ax1, ax2) = plt.subplots(1,2)
+    ax1.set_axisbelow(True)
+    ax1.yaxis.grid(color='gray', linestyle='dashed')
+    ax2.set_axisbelow(True)
+    ax2.yaxis.grid(color='gray', linestyle='dashed')
+
+    switchtb = summary['model'].switchtb
+    links = get_idx_value(switchtb, "LINKS_SW")
+
+    ax1.set_xticks(links)
+    ax2.set_xticks(links)
+
+    def plot(tab,label, linestyle, WIDTH):
+        linewidth = 2 if WIDTH > 32 else 1
+        tab = lookup(tab, WIDTH=WIDTH)
+        areas = tab.loc[:,AREA_HEADER].values
+        energy = tab.loc[:,ENERGY_HEADER].values / WIDTH
+        ax1.plot(links, areas, label=label, linestyle=linestyle, linewidth=linewidth)
+        ax2.plot(links, energy*1e15, label=label, linestyle=linestyle, linewidth=linewidth)
+
+    # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=4,LINKS_CU=1)
+    # plot(tab, 'v-8dir-xbar-db','-',2, 512)
+    # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=4,LINKS_CU=1)
+    # plot(tab, 's-8dir-xbar-db','-',2, 32)
+    # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=4,LINKS_CU=1)
+    # plot(tab, 'v-8dir-xbar','-',1, 512)
+    # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=4,LINKS_CU=1)
+    # plot(tab, 's-8dir-xbar','-',1, 32)
+    tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=1,LINKS_CU=4)
+    plot(tab, 'v-db','-',512)
+    tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=1,LINKS_CU=4)
+    plot(tab, 's-db','-',32)
+    tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=1,LINKS_CU=4)
+    plot(tab, 'v-cd','--',512)
+    tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=1,LINKS_CU=4)
+    plot(tab, 's-cd','--',32)
+
+    plt.tight_layout()
+    ax1.set_xlabel('Number of static links between switches')
+    ax2.set_xlabel('Number of static links between switches')
+    ax1.set_ylabel('Area ($um^2$)')
+    ax2.set_ylabel('Energy (fJ/bit)')
+    ax1.legend(loc=2, ncol=2, fontsize='x-small')
+    plt.gcf().subplots_adjust(left=0.12,bottom=0.12)
+    fig.set_size_inches(8,4)
+    plot_path = 'figs/switch.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def gen_router():
+    path = "router.tex"
+    routertb = summary['model'].routertb
+    with open(path, 'w') as f:
+        def printrow(flit, vc, pvcbs, npr):
+            tab = lookup(routertb, flit_data_width=flit, num_message_classes=vc, buffer_size=vc*pvcbs,
+            num_nodes_per_router=npr,sim_scalar=0)
+            area = round(get_col_value(tab, AREA_HEADER),2)
+            energy = round(get_col_value(tab, ENERGY_HEADER)*1e15 / flit,2)
+            f.write('{} & {} & {} & {} \\\\\n'.format(vc, pvcbs, area, energy))
+        printrow(flit=512,vc=4,pvcbs=2,npr=1)
+        printrow(flit=512,vc=2,pvcbs=4,npr=1)
+        printrow(flit=512,vc=4,pvcbs=4,npr=1)
+        printrow(flit=512,vc=8,pvcbs=4,npr=1)
+        # printrow(flit=512,vc=4,pvcbs=4,npr=4)
+        # printrow(flit=32,vc=4,pvcbs=2)
+        # printrow(flit=256,vc=4,pvcbs=4,npr=1)
+    print('Generate {}'.format(path))
+
+def plot_area():
+    colors = getcolors("Paired", 8)[0:5]
+    tps = ['total_pcu_area', 'total_pmu_area', 'total_router_area', 'total_vswitch_area', 'total_sswitch_area'] 
+    cols = [d for d in designs if d['net'] not in ["p2p", "asic"]]
+    names = [netname(col) for col in cols]
+
+    fig, ax = plt.subplots()
+    barwidth = 0.4
+    inds = np.array(range(len(cols)))
+    ax.set_axisbelow(True)
+    ax.yaxis.grid(color='gray', linestyle='dashed')
+    ax.set_prop_cycle(cycler('color', colors))
+
+    bottom = np.zeros(len(cols))
+    for tp in tps:
+        areas = []
+        for col in cols:
+            areas.append(get_col_value(summary['area'] / 1e6, tp, **col))
+        areas = np.array(areas)
+        ax.bar(inds, np.array(areas), bottom=bottom, width=barwidth, edgecolor='none', label=tp)
+        bottom += areas 
+
+    ax.set_xticks(inds)
+    ax.set_xticklabels(names, rotation=40)
+    ax.set_xlabel('Network Architectures')
+    ax.set_ylabel('Area ($mm^2$)')
+    ax.set_ylim(0,max(bottom)*1.2)
+    ax.legend(loc=2, ncol=5, fontsize='x-small')
+    fig.set_size_inches(7,4)
+    plt.gcf().subplots_adjust(bottom=0.2)
+    plot_path = 'figs/area.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def plot_qs():
+    fig, ax = plt.subplots()
+    cs = [D_v1_s4, D_v1_s4_q4, D_v1_s4_q8, D_v1_s4_q16]
+    markers = ['o','^','s','>']
+    for i, c in enumerate(cs):
+        c_area = get_col_value(summary['area'], 'total_net_area', **c) / 1e6
+        for app in summary['link_count']:
+            D_v1_s4_cycles = get_col_value(summary['sim'], "cycle", app=app, **D_v1_s4)
+            c_cycles = get_col_value(summary['sim'], "cycle", app=app, **c)
+            if c == D_v1_s4:
+                ax.scatter(c_cycles * 1.0 / D_v1_s4_cycles, c_area, label=getname(app), marker=markers[i])
+            else:
+                ax.scatter(c_cycles * 1.0 / D_v1_s4_cycles, c_area, marker=markers[i])
+
+    # ax.set_xticks(inds)
+    # ax.set_xticklabels(names, rotation=40)
+    ax.set_xlabel('Slow down compared to ideal network')
+    ax.set_ylabel('Area ($mm^2$)')
+    ax.set_ylim(0,22)
+    ax.legend(loc=2, ncol=5, fontsize='x-small')
+    fig.set_size_inches(7,4)
+    plt.gcf().subplots_adjust(bottom=0.2)
+    plot_path = 'figs/qs.pdf'
+    plt.savefig(plot_path, format='pdf', dpi=900)
+    print('Generate {}'.format(plot_path))
+
+def get_geo_mean():
+    print('v2_s4 vs D_v1_s4')
+    v2_s4_energy = get_col(summary['energy'], 'total_net_energy', **v2_s4)
+    D_v1_s4_energy = get_col(summary['energy'], 'total_net_energy', **D_v1_s4)
+    print('energy', 1-geomean(D_v1_s4_energy / v2_s4_energy))
+
+    v2_s4_cycle = get_col(summary['sim'], 'cycle', **v2_s4) 
+    D_v1_s4_cycle = get_col(summary['sim'], 'cycle', **D_v1_s4)
+    print('cycle', geomean(D_v1_s4_cycle * 1.0 / v2_s4_cycle))
+
+    v2_s4_area = get_col(summary['area'], 'total_area', **v2_s4) 
+    D_v1_s4_area = get_col(summary['area'], 'total_area', **D_v1_s4)
+    print('area',  D_v1_s4_area / v2_s4_area)
+
+    print('v2_s4 vs D_v1_s4')
+    v3_s4_energy = get_col(summary['energy'], 'total_net_energy', **v3_s4)
+    v2_s4_energy = get_col(summary['energy'], 'total_net_energy', **v2_s4)
+    print('energy', geomean(v3_s4_energy / v2_s4_energy))
+
+parser = argparse.ArgumentParser(description='Run experiments')
+parser.add_argument('--summarize', dest='summarize', action='store_true', default=False) 
+(opts, args) = parser.parse_known_args()
+
+def main():
+    if opts.summarize:
+        summarize()
+
+    global summary
+    summary = init()
+
+    # print(get_switch_spec(vec=True, **v2_s4))
+    # print(get_switch_spec(vec=True, **D_v2_s4))
+    # # print(lookup(summary['switchtb'], sim_scalar=0, XBAR_FULL=1, DIRS_CU=1,LINKS_CU=4,
+        # # BACKPRESSURE=1))
+    # print(lookup(summary['energy'], appname='GDA', vlink=2)['DynHopsVec'])
+    # exit()
+
+    get_geo_mean()
+    plot_switch()
+    gen_router()
+    plot_vc()
+    plot_area()
+    plot_vc_area()
+    plot_util_bw()
+    plot_sim()
+    plot_link1()
+    plot_link2()
+    plot_link3()
+    plot_link4()
+    plot_link5()
+    # plot_qs()
+
+if __name__ == "__main__":
+    main()
