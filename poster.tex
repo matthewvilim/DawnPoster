@@ -57,10 +57,31 @@
 \end{tcolorbox}
 
 \begin{figure}[H]
-\caption{Mining Process Block Diagram}
-\label{mining_process}
+\caption{Compilation Flow}
+\label{fig:flow}
 \centering
-\includegraphics[width=0.8\linewidth]{mining_process}
+\includegraphics[width=1\linewidth]{figs/flow.pdf}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Mapping Application onto Plasticine}
+\label{fig:mapping}
+\centering
+\includegraphics[width=1\linewidth]{figs/arch.pdf}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Graph characteristic for spatial applications}
+\label{fig:link}
+\centering
+\includegraphics[width=1\linewidth]{figs/link5.pdf}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Area overheads for network architectures}
+\label{fig:area}
+\centering
+\includegraphics[width=1\linewidth]{figs/area.pdf}
 \end{figure}
 
 \begin{tcolorbox}
@@ -137,12 +158,6 @@
 \end{algorithm}
 
 \hfill
-\begin{figure}[H]
-\caption{SHA-256 Pipeline Datapath}
-\centering
-\includegraphics[width=0.8\linewidth]{sha256_datapath}
-\label{fig:sha256_datapath}
-\end{figure}
 
 \begin{tcolorbox}[title=Approximate Mining]
 \lettrine{A}{} miner's instantaneous profit $p(t,f)$ at time $t$ and frequency $f$ is a function of the mining yield $Y(t)$ (\si{USD \per GHash}), hash rate $H(f)$ (\si{GHash\per\second}), power consumption $P(f)$ (\si{\kilo\watt}), and cost of electricity $C_e(t)$ (\si{USD\per\kWh}).
@@ -212,46 +227,6 @@ KSA\textsubscript{16} & 82,744 & 19.0 & $8.79 \times 10^{-2}$ \\
 KSA\textsubscript{8} & 73,152 & 20.4 & $1.00$ \\
 \end{tabular}
 \end{table}
-
-\begin{figure}[H]
-\caption{Frequency/Error Rate Trade-off for Cores}
-\centering
-\begin{tikzpicture}
-\begin{axis}[xlabel=frequency (\si{{\giga\hertz}}), ylabel=error rate (ER), legend pos= north west, width=0.8\linewidth]
-\addplot[color=black,solid,mark=o] table [x index = {0}, y index = {1}, col sep=comma] {data/rpl_freq_error.txt};
-\addlegendentry{RCA}
-\addplot[color=black,dashed,mark=*] table [x index = {0}, y index = {1}, col sep=comma] {data/cla_freq_error.txt};
-\addlegendentry{CLA}
-\addplot[color=black,dotted,mark=x,mark options={solid}] table [x index = {0}, y index = {1}, col sep=comma] {data/gda_freq_error.txt};
-\addlegendentry{GDA\textsubscript{(1,4)}}
-\addplot[color=black,solid,mark=x] table [x index = {0}, y index = {1}, col sep=comma] {data/ksa32_freq_error.txt};
-\addlegendentry{KSA\textsubscript{32}}
-\addplot[color=black,dotted,mark=o,mark options={solid}] table [x index = {0}, y index = {1}, col sep=comma] {data/ksa16_freq_error.txt};
-\addlegendentry{KSA\textsubscript{16}}
-\end{axis}
-\end{tikzpicture}
-\label{fig:freq_scaling}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\caption{Frequency/Profit Trade-off for Cores}
-\label{fig:profit_freq}
-\begin{tikzpicture}
-\begin{axis}[xlabel=frequency (\si{{\giga\hertz}}), ylabel=profit (\si{USD\per\second}), legend pos= south west, width=0.8\linewidth]
-\addplot[color=black,solid,mark=o] table [x index = {0}, y index = {1}, col sep=comma] {data/rpl_freq_profit.txt};
-\addlegendentry{RCA}
-\addplot[color=black,dashed,mark=*] table [x index = {0}, y index = {1}, col sep=comma] {data/cla_freq_profit.txt};
-\addlegendentry{CLA}
-\addplot[color=black,dotted,mark=x,mark options={solid}] table [x index = {0}, y index = {1}, col sep=comma] {data/gda_freq_profit.txt};
-\addlegendentry{GDA\textsubscript{(1,4)}}
-\addplot[color=black,solid,mark=x] table [x index = {0}, y index = {1}, col sep=comma] {data/ksa32_freq_profit.txt};
-\addlegendentry{KSA\textsubscript{32}}
-\addplot[color=black,dotted,mark=o,mark options={solid}] table [x index = {0}, y index = {1}, col sep=comma] {data/ksa16_freq_profit.txt};
-\addlegendentry{KSA\textsubscript{16}}
-\end{axis}
-\end{tikzpicture}
-\end{figure}
 
 \begin{tcolorbox}[title=Conclusions]
 \lettrine{M}{ining} is a particularly good candidate for approximation because hashes are computed independently and in parallel, mitigating the effect of errors, and a built-in verification system detects any false positives. Furthermore, we have identified adders as beneficial choices for approximation in hashing cores in a mining ASIC. However, not all approximate adders yield increases in profit. Profits are maximized by adders that minimize delay at the expense of area, and approximate adders should be chosen accordingly. Moreover, profits may be improved by operating the hashing cores at Better Than Worst-Case (BTWC) operating points, past their nominal frequencies.

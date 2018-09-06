@@ -250,3 +250,4 @@ TSWLatexianTemp*
 *.swp
 *.ps
 *.pyc
+.DS_Store
