@@ -1,0 +1,73 @@
+\documentclass[25pt,extrafontsizes]{memoir}
+%\setstocksize{30in}{40in}
+\usepackage{xcolor}
+\usepackage[paperwidth=40in,paperheight=30in,margin=1in]{geometry}
+\pagestyle{empty}
+
+\usepackage[default,semibold]{sourcesanspro}
+\usepackage[T1]{fontenc}
+
+\usepackage[english]{babel}
+\usepackage{blindtext}
+
+\usepackage{multicol}
+\setlength{\columnsep}{-0.00in}
+\setlength{\fboxsep}{0.25in}
+\setlength{\fboxrule}{6pt}
+\setlength{\parskip}{18pt}
+\setlength{\parindent}{0pt}
+
+\usepackage{tcolorbox}
+\definecolor{cardinal}{cmyk}{0, 1.00, 0.65, 0.34}
+\definecolor{sandstone}{cmyk}{0.03, 0.12, 0.34, 0.10}
+%\definecolor{mainred}{rgb}{0, 0, 0}
+
+%{\hspace{1em}\Large Section Header}\\[24pt]
+%\fbox{\parbox{\columnwidth}{\blindtext}}
+%\parbox{\columnwidth}{\hspace{1em}{\Large Section Header}\\[18pt]\blindtext}
+
+%\newcommand{\textbox}[2]{
+  %\parbox{0.95\columnwidth}{\hspace{1em}{\Large #1}\\[18pt]#2}}
+\newcommand{\textbox}[2]{
+  \parbox{0.95\columnwidth}{\hspace{1.5em}{\Large \color{cardinal}\textbf{#1}}\\[-0.7\baselineskip]
+  \begin{tcolorbox}[colframe=cardinal,arc=0.25in,colback=sandstone]
+    #2
+  \end{tcolorbox}}}
+\newcommand{\rulebox}[2]{
+  \parbox{0.95\columnwidth}{
+    \leavevmode{\Large
+    \color{cardinal}
+    \leaders\hrule height\dimexpr.5ex+0.075ex depth\dimexpr-.5ex+0.075ex\hskip 0.75in
+    \hskip 0.2em \hbox{\textbf{#1}} \hskip 0.0em 
+    %\leaders\hrule height.1ex depth\dimexpr-.1ex+4.0pt\hfill~}\\
+      \leaders\hrule height\dimexpr.5ex+0.075ex depth\dimexpr-.5ex+0.075ex \hfill\hspace*{0pt}}\\[0.2in]
+      \centering
+      \parbox{\dimexpr0.95\columnwidth-0.5in}{#2}\\
+  }}
+\newcommand{\auth}[2]{\parbox{10in}{{\Large #1}\\\texttt{#2}}}
+
+\begin{document}
+\parbox{3in}{\centering \includegraphics[height=2.0in]{stanfordlogo.eps}}
+\hfill
+\parbox{30in}{\centering \HUGE \textbf{\color{cardinal} Increasing Dynamism in Plasticine}\\[0.2in]
+\Large Alexander Rucker, Yaqi Zhang, Matthew Vilim}
+\hfill
+\parbox{3in}{\centering \includegraphics[height=2.0in]{dawnlogo.pdf}}\\[0.5in]
+
+\begin{multicols}{3}
+  \centering
+  \textbox{Section Header}{\blindtext}
+  \rulebox{Section Header}{\blindtext}
+  \rulebox{Section Header}{\blindtext}
+  \textbox{Section Header}{\blindtext}
+  \rulebox{Section Header}{\blindtext}
+  \rulebox{Section Header}{\blindtext}
+  \textbox{Section Header}{\blindtext}
+  \rulebox{Section Header}{\blindtext}
+  \rulebox{Section Header}{\blindtext}
+  %\\[4in]
+  %\Blindtext
+\end{multicols}
+
+
+\end{document}
