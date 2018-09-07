@@ -20,6 +20,7 @@
 \usepackage{authblk}
 \usepackage{tcolorbox}
 \usepackage{lettrine}
+\usepackage{booktabs}
 
 \pagestyle{fancy}
 \pagenumbering{gobble}
@@ -53,14 +54,63 @@
 \end{tcolorbox}
 
 \begin{tcolorbox}[title=Mining Background]
-\lettrine{T}{he} Bitcoin mining process is summarized in Figure \ref{mining_process}. Mining consists of searching for a cryptographic \emph{nonce} value within a block such that the hash of the block falls within a certain range.
+\lettrine{T}{he} Bitcoin mining process is summarized in Figure. Mining consists of searching for a cryptographic \emph{nonce} value within a block such that the hash of the block falls within a certain range.
 \end{tcolorbox}
 
 \begin{figure}[H]
-\caption{Mining Process Block Diagram}
-\label{mining_process}
+\caption{Compilation Flow}
+\label{fig:flow}
 \centering
-\includegraphics[width=0.8\linewidth]{mining_process}
+\includegraphics[width=1\linewidth]{figs/flow.pdf}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Mapping Application onto Plasticine}
+\label{fig:mapping}
+\centering
+\includegraphics[width=1\linewidth]{figs/arch.pdf}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Graph characteristic for spatial applications}
+\label{fig:link}
+\centering
+\includegraphics[width=1\linewidth]{figs/link5.pdf}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Area and power scaling of switch parameters}
+\label{fig:switch}
+\centering
+\includegraphics[width=1\linewidth]{figs/switch.pdf}
+\end{figure}
+
+\begin{table}
+\centering
+\footnotesize
+  \begin{tabular*}{\columnwidth}{>{\centering\arraybackslash}m{1.25cm}|>{\centering\arraybackslash}m{1.75cm}|>{\centering\arraybackslash}m{1.75cm}|>{\centering\arraybackslash}m{1.75cm}}
+    \bottomrule
+   % Flit Width & 
+    \#VC & Per VC Buffer Depth & Area ($um^2$) & Energy($fJ$/bit) \\\hline
+    \input{text/router.tex}
+    \bottomrule
+  \end{tabular*}
+  \caption{Router area and per-bit energy}
+  \label{tab:router}
+\end{table}
+
+\begin{figure}[H]
+\caption{Area overheads for network architectures}
+\label{fig:area}
+\centering
+\includegraphics[width=1\linewidth]{figs/area.pdf}
+\end{figure}
+
+\begin{figure}[H]
+\caption{Performance evaluation of network architectures}
+\label{fig:slow_down}
+\centering
+\includegraphics[width=1\linewidth]{figs/slow_down.pdf}
 \end{figure}
 
 \begin{tcolorbox}
@@ -137,12 +187,6 @@
 \end{algorithm}
 
 \hfill
-\begin{figure}[H]
-\caption{SHA-256 Pipeline Datapath}
-\centering
-\includegraphics[width=0.8\linewidth]{sha256_datapath}
-\label{fig:sha256_datapath}
-\end{figure}
 
 \begin{tcolorbox}[title=Approximate Mining]
 \lettrine{A}{} miner's instantaneous profit $p(t,f)$ at time $t$ and frequency $f$ is a function of the mining yield $Y(t)$ (\si{USD \per GHash}), hash rate $H(f)$ (\si{GHash\per\second}), power consumption $P(f)$ (\si{\kilo\watt}), and cost of electricity $C_e(t)$ (\si{USD\per\kWh}).
@@ -174,7 +218,7 @@ E_i(f) = E_f + E_o(f) \qquad E(f) = 1 - [1 - E_i(f)]^2
 \end{tcolorbox}
 
 \begin{tcolorbox}[title=Results]
-\lettrine{T}{able} \ref{table:adders} lists the adders' delay and area. Each adder was inserted into the hashing core pipelines in the CPA slots indicated in Figure \ref{fig:sha256_datapath}. The resulting hashing core area and delay are provided in Table \ref{table:pipeline}. Approximate variants are highlighted in gray. Figure \ref{fig:freq_scaling} shows the error rate-frequency characteristic $E_i(f)$ of each hashing core for various adders after simulating a full round of SHA-256. The resulting frequency-profit relation is shown in Figure \ref{fig:profit_freq}.
+\lettrine{T}{able} \ref{table:router} lists the adders' delay and area. Each adder was inserted into the hashing core pipelines in the CPA slots indicated in Figure \ref{fig:sha256_datapath}. The resulting hashing core area and delay are provided in Table \ref{table:pipeline}. Approximate variants are highlighted in gray. Figure \ref{fig:freq_scaling} shows the error rate-frequency characteristic $E_i(f)$ of each hashing core for various adders after simulating a full round of SHA-256. The resulting frequency-profit relation is shown in Figure \ref{fig:profit_freq}.
 \end{tcolorbox}
 
 \begin{table}[H]
@@ -212,46 +256,6 @@ KSA\textsubscript{16} & 82,744 & 19.0 & $8.79 \times 10^{-2}$ \\
 KSA\textsubscript{8} & 73,152 & 20.4 & $1.00$ \\
 \end{tabular}
 \end{table}
-
-\begin{figure}[H]
-\caption{Frequency/Error Rate Trade-off for Cores}
-\centering
-\begin{tikzpicture}
-\begin{axis}[xlabel=frequency (\si{{\giga\hertz}}), ylabel=error rate (ER), legend pos= north west, width=0.8\linewidth]
-\addplot[color=black,solid,mark=o] table [x index = {0}, y index = {1}, col sep=comma] {data/rpl_freq_error.txt};
-\addlegendentry{RCA}
-\addplot[color=black,dashed,mark=*] table [x index = {0}, y index = {1}, col sep=comma] {data/cla_freq_error.txt};
-\addlegendentry{CLA}
-\addplot[color=black,dotted,mark=x,mark options={solid}] table [x index = {0}, y index = {1}, col sep=comma] {data/gda_freq_error.txt};
-\addlegendentry{GDA\textsubscript{(1,4)}}
-\addplot[color=black,solid,mark=x] table [x index = {0}, y index = {1}, col sep=comma] {data/ksa32_freq_error.txt};
-\addlegendentry{KSA\textsubscript{32}}
-\addplot[color=black,dotted,mark=o,mark options={solid}] table [x index = {0}, y index = {1}, col sep=comma] {data/ksa16_freq_error.txt};
-\addlegendentry{KSA\textsubscript{16}}
-\end{axis}
-\end{tikzpicture}
-\label{fig:freq_scaling}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\caption{Frequency/Profit Trade-off for Cores}
-\label{fig:profit_freq}
-\begin{tikzpicture}
-\begin{axis}[xlabel=frequency (\si{{\giga\hertz}}), ylabel=profit (\si{USD\per\second}), legend pos= south west, width=0.8\linewidth]
-\addplot[color=black,solid,mark=o] table [x index = {0}, y index = {1}, col sep=comma] {data/rpl_freq_profit.txt};
-\addlegendentry{RCA}
-\addplot[color=black,dashed,mark=*] table [x index = {0}, y index = {1}, col sep=comma] {data/cla_freq_profit.txt};
-\addlegendentry{CLA}
-\addplot[color=black,dotted,mark=x,mark options={solid}] table [x index = {0}, y index = {1}, col sep=comma] {data/gda_freq_profit.txt};
-\addlegendentry{GDA\textsubscript{(1,4)}}
-\addplot[color=black,solid,mark=x] table [x index = {0}, y index = {1}, col sep=comma] {data/ksa32_freq_profit.txt};
-\addlegendentry{KSA\textsubscript{32}}
-\addplot[color=black,dotted,mark=o,mark options={solid}] table [x index = {0}, y index = {1}, col sep=comma] {data/ksa16_freq_profit.txt};
-\addlegendentry{KSA\textsubscript{16}}
-\end{axis}
-\end{tikzpicture}
-\end{figure}
 
 \begin{tcolorbox}[title=Conclusions]
 \lettrine{M}{ining} is a particularly good candidate for approximation because hashes are computed independently and in parallel, mitigating the effect of errors, and a built-in verification system detects any false positives. Furthermore, we have identified adders as beneficial choices for approximation in hashing cores in a mining ASIC. However, not all approximate adders yield increases in profit. Profits are maximized by adders that minimize delay at the expense of area, and approximate adders should be chosen accordingly. Moreover, profits may be improved by operating the hashing cores at Better Than Worst-Case (BTWC) operating points, past their nominal frequencies.

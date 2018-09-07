@@ -247,3 +247,7 @@ TSWLatexianTemp*
 
 # standalone packages
 *.sta
+*.swp
+*.ps
+*.pyc
+.DS_Store
