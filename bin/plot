@@ -227,7 +227,7 @@ def plot_sim():
     plt.gcf().subplots_adjust(bottom=0.15)
     fig.set_size_inches(16,8)
     plot_path = 'figs/slow_down.pdf'
-    plt.savefig(plot_path, format='pdf', dpi=900)
+    plt.savefig(plot_path, format='pdf', dpi=900, transparent=True)
     print('Generate {}'.format(plot_path))
 
 def plot_vc():

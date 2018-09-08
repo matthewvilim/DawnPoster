@@ -1,26 +1,44 @@
-\documentclass[25pt,extrafontsizes]{memoir}
+\documentclass[30pt,extrafontsizes]{memoir}
 %\setstocksize{30in}{40in}
 \usepackage{xcolor}
-\usepackage[paperwidth=40in,paperheight=30in,margin=1in]{geometry}
+\usepackage[paperwidth=40in,paperheight=30in,margin=1.25in]{geometry}
 \pagestyle{empty}
 
-\usepackage[default,semibold]{sourcesanspro}
-\usepackage[T1]{fontenc}
+%\usepackage[default,semibold]{sourcesanspro}
+%\usepackage{sourcecodepro}
+%\usepackage[T1]{fontenc}
+\usepackage{fontspec}
+%\setmainfont[BoldFont={Source Sans Pro Semibold}]{Source Sans Pro Light}
+\setmainfont[BoldFont={Source Sans Pro Semibold}, RawFeature={+kern, +ss01}]{Source Sans Pro}
+\addfontfeature{Alternate=ss04}
 
 \usepackage[english]{babel}
 \usepackage{blindtext}
 
+\usepackage{pbox}
+\usepackage{enumitem}
+\setitemize{label={\color{cardinal}\vrule height\dimexpr.7ex+0.125ex depth\dimexpr-.7ex+0.125ex width0.5em},
+            leftmargin=0pt,
+            itemsep=-0.05in,
+            topsep=-0.15in}
+\setenumerate{label={\color{cardinal}\arabic*},
+            leftmargin=0pt,
+            itemsep=-0.05in,
+            topsep=-0.15in}
+
 \usepackage{multicol}
 \setlength{\columnsep}{-0.00in}
-\setlength{\fboxsep}{0.25in}
-\setlength{\fboxrule}{6pt}
-\setlength{\parskip}{18pt}
+\setlength{\parskip}{0.8\baselineskip}
 \setlength{\parindent}{0pt}
 
+\usepackage{microtype}
 \usepackage{tcolorbox}
 \definecolor{cardinal}{cmyk}{0, 1.00, 0.65, 0.34}
 \definecolor{sandstone}{cmyk}{0.03, 0.12, 0.34, 0.10}
+\definecolor{cloud}{cmyk}{0.03, 0.04, 0.14, 0.08}
 %\definecolor{mainred}{rgb}{0, 0, 0}
+
+%\pagecolor{cloud}
 
 %{\hspace{1em}\Large Section Header}\\[24pt]
 %\fbox{\parbox{\columnwidth}{\blindtext}}
@@ -40,31 +58,64 @@
     \leaders\hrule height\dimexpr.5ex+0.075ex depth\dimexpr-.5ex+0.075ex\hskip 0.75in
     \hskip 0.2em \hbox{\textbf{#1}} \hskip 0.0em 
     %\leaders\hrule height.1ex depth\dimexpr-.1ex+4.0pt\hfill~}\\
-      \leaders\hrule height\dimexpr.5ex+0.075ex depth\dimexpr-.5ex+0.075ex \hfill\hspace*{0pt}}\\[0.2in]
+      \leaders\hrule height\dimexpr.5ex+0.075ex depth\dimexpr-.5ex+0.075ex \hfill\hspace*{0pt}}\\[0.20in]
       \centering
-      \parbox{\dimexpr0.95\columnwidth-0.5in}{#2}\\
-  }}
-\newcommand{\auth}[2]{\parbox{10in}{{\Large #1}\\\texttt{#2}}}
+      \parbox{\dimexpr0.95\columnwidth-0.5in}{\setlength{\parskip}{0.15in}\setlength{\partopsep}{0in}#2}
+    }\par}
+\renewcommand{\emph}[1]{\textit{\color{cardinal}#1}}
+\newcommand{\subhead}[1]{\par\hskip-.25in\textbf{\color{cardinal}#1: }}
+\newcommand{\bigidea}[1]{\parbox{0.95\columnwidth}{
+  \centering\Large\color{cardinal}\textbf{\textit{#1}}}
+\par}
+\newcommand{\authbox}[1]{
+  \begin{tabular}[t]{c}
+    #1
+  \end{tabular}
+}
+\newcommand{\head}[2]{
+  \newlength{\titleheight}
+  \settoheight{\titleheight}{\hbox{\parbox{30in}{\centering {\HUGE \textbf{\color{cardinal} #1}\\[0.2in]}\authbox{#2}\\[0.5in]}}}
+  \parbox{3in}{\raggedright \includegraphics[height=1.2\titleheight]{stanfordlogo.eps}}
+  \hfill
+  \parbox{30in}{\centering {\HUGE \textbf{\color{cardinal} #1}\\[0.2in]}\authbox{#2}}
+  \hfill
+  \parbox{3in}{\raggedleft \includegraphics[height=1.5\titleheight]{dawnlogo.pdf}}\\[0.5in]
+}
+\newcommand{\auth}[2]{{\Large #1}\\\texttt{\large #2}}
+%\newcommand{\auth}[2]{\pbox[t]{5.0in}{{\Large {~\hfill#1\hfill~}}\\\texttt{~\hfill#2\hfill~}}}
+%\renewcommand\labelitemi{{\color{cardinal}\vrule height\dimexpr.7ex+0.125ex depth\dimexpr-.7ex+0.125ex width0.5em}}
 
 \begin{document}
-\parbox{3in}{\centering \includegraphics[height=2.0in]{stanfordlogo.eps}}
-\hfill
-\parbox{30in}{\centering \HUGE \textbf{\color{cardinal} Increasing Dynamism in Plasticine}\\[0.2in]
-\Large Alexander Rucker, Yaqi Zhang, Matthew Vilim}
-\hfill
-\parbox{3in}{\centering \includegraphics[height=2.0in]{dawnlogo.pdf}}\\[0.5in]
+
+\head{Increasing Dynamism in Plasticine}{\auth{Alexander Rucker}{acrucker@stanford.edu}\and\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Matthew Vilim}{mvilim@stanford.edu}}
 
 \begin{multicols}{3}
   \centering
-  \textbox{Section Header}{\blindtext}
+  \rulebox{Section Header}{\blindtext}
+  \rulebox{Section Header}{\blindtext
+  \subhead{Sub-header}\blindtext
+  \subhead{Second idea}\blindtext}
+  \bigidea{This is a big idea of the proposed work!}
   \rulebox{Section Header}{\blindtext}
   \rulebox{Section Header}{\blindtext}
-  \textbox{Section Header}{\blindtext}
   \rulebox{Section Header}{\blindtext}
   \rulebox{Section Header}{\blindtext}
-  \textbox{Section Header}{\blindtext}
-  \rulebox{Section Header}{\blindtext}
-  \rulebox{Section Header}{\blindtext}
+  \rulebox{Bulleted List Test}{\begin{itemize}
+      \item This is
+        \item A test
+          \item \blindtext
+  \end{itemize}}
+  \rulebox{Numbered List Test}{\begin{enumerate}
+      \item This is
+      \item A test includeing \emph{emphasized} text
+          \item \blindtext
+  \end{enumerate}}
+  \rulebox{PDF Test}{
+\includegraphics[width=1\linewidth]{figs/flow.pdf}
+}
+  \rulebox{PDF Test}{
+\includegraphics[width=1\linewidth]{figs/switch.pdf}
+}
   %\\[4in]
   %\Blindtext
 \end{multicols}
