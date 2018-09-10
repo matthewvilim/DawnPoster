@@ -46,11 +46,9 @@
 
 %\newcommand{\textbox}[2]{
   %\parbox{0.95\columnwidth}{\hspace{1em}{\Large #1}\\[18pt]#2}}
-\newcommand{\textbox}[2]{
-  \parbox{0.95\columnwidth}{\hspace{1.5em}{\Large \color{cardinal}\textbf{#1}}\\[-0.7\baselineskip]
-  \begin{tcolorbox}[colframe=cardinal,arc=0.25in,colback=sandstone]
-    #2
-  \end{tcolorbox}}}
+\newcommand{\textbox}[1]{
+      \parbox{\dimexpr0.95\columnwidth-0.5in}{\setlength{\parskip}{0.15in}\setlength{\partopsep}{0in}#1}
+    }
 \newcommand{\rulebox}[2]{
   \parbox{0.95\columnwidth}{
     \leavevmode{\Large
@@ -81,6 +79,12 @@
   \hfill
   \parbox{3in}{\raggedleft \includegraphics[height=1.5\titleheight]{dawnlogo.pdf}}\\[0.5in]
 }
+\newcommand{\splitcol}[2]{
+  \parbox{#1}{
+    \setlength{\columnwidth}{#1}
+    {#2}
+  }
+}
 \newcommand{\auth}[2]{{\Large #1}\\\texttt{\large #2}}
 %\newcommand{\auth}[2]{\pbox[t]{5.0in}{{\Large {~\hfill#1\hfill~}}\\\texttt{~\hfill#2\hfill~}}}
 %\renewcommand\labelitemi{{\color{cardinal}\vrule height\dimexpr.7ex+0.125ex depth\dimexpr-.7ex+0.125ex width0.5em}}
@@ -89,36 +93,47 @@
 
 \head{Increasing Dynamism in Plasticine}{\auth{Alexander Rucker}{acrucker@stanford.edu}\and\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Matthew Vilim}{mvilim@stanford.edu}}
 
-\begin{multicols}{3}
+\splitcol{0.3333\columnwidth}{
+  \rulebox{Background}{
+  }
+  \rulebox{Compiler \& Mapping Flow}{
+    \centering
+    \includegraphics[width=1\linewidth]{figs/flow.pdf}\\
+  }
+}
+\splitcol{0.6666\columnwidth}{
+  \rulebox{Hybrid Networks}{
+  }
+  \splitcol{0.49\columnwidth}{
+    \textbox{
+      \includegraphics[width=1\linewidth]{figs/link5.pdf}\\
+    }
+  }
+  \splitcol{0.49\columnwidth}{
+    \textbox{
+      \includegraphics[width=1\linewidth]{figs/area.pdf}\\
+    }
+  }
   \centering
-  \rulebox{Section Header}{\blindtext}
-  \rulebox{Section Header}{\blindtext
-  \subhead{Sub-header}\blindtext
-  \subhead{Second idea}\blindtext}
-  \bigidea{This is a big idea of the proposed work!}
-  \rulebox{Section Header}{\blindtext}
-  \rulebox{Section Header}{\blindtext}
-  \rulebox{Section Header}{\blindtext}
-  \rulebox{Section Header}{\blindtext}
-  \rulebox{Bulleted List Test}{\begin{itemize}
-      \item This is
-        \item A test
-          \item \blindtext
-  \end{itemize}}
-  \rulebox{Numbered List Test}{\begin{enumerate}
-      \item This is
-      \item A test includeing \emph{emphasized} text
-          \item \blindtext
-  \end{enumerate}}
-  \rulebox{PDF Test}{
-\includegraphics[width=1\linewidth]{figs/flow.pdf}
+  \includegraphics[width=0.7\linewidth]{figs/slow_down.pdf}\\
+  \splitcol{0.5\columnwidth}{
+    \textbox{
+      \includegraphics[width=1\linewidth]{figs/arch.pdf}\\
+    }
+  }
+  \splitcol{0.5\columnwidth}{
+    \centering
+    \includegraphics[width=1\linewidth]{figs/switch.pdf}\\
+    %\begin{tabular}{cccc}
+      %\#VC & Buffer Slots & Area ($\mu m^2$) & Energy($fJ$/bit) \\\hline
+      %\input{text/router.tex}
+    %\end{tabular}\\
+  }
+  %\splitcol{0.5\columnwidth}{
+    %\textbox{
+      %\includegraphics[width=1\linewidth]{figs/area.pdf}\\
+    %}
+  %}
 }
-  \rulebox{PDF Test}{
-\includegraphics[width=1\linewidth]{figs/switch.pdf}
-}
-  %\\[4in]
-  %\Blindtext
-\end{multicols}
-
 
 \end{document}
