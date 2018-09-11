@@ -777,11 +777,17 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
     return texts
 
 def plot_switch():
-    fig, (ax1, ax2) = plt.subplots(1,2)
+    fig, (ax1, ax2) = plt.subplots(1,2, sharex=True)
     ax1.set_axisbelow(True)
     ax1.yaxis.grid(color='gray', linestyle='dashed')
     ax2.set_axisbelow(True)
     ax2.yaxis.grid(color='gray', linestyle='dashed')
+    fig.add_subplot(111, frameon=False)
+    # hide tick and tick label of the big axes
+    plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
+    plt.grid(False)
+    plt.xlabel("Static Links Between Switches")
+
 
     switchtb = summary['model'].switchtb
     links = get_idx_value(switchtb, "LINKS_SW")
@@ -794,7 +800,7 @@ def plot_switch():
         tab = lookup(tab, WIDTH=WIDTH)
         areas = tab.loc[:,AREA_HEADER].values
         energy = tab.loc[:,ENERGY_HEADER].values / WIDTH
-        ax1.plot(links, areas, label=label, linestyle=linestyle, linewidth=linewidth)
+        ax1.plot(links, areas/1000/1000, label=label, linestyle=linestyle, linewidth=linewidth)
         ax2.plot(links, energy*1e15, label=label, linestyle=linestyle, linewidth=linewidth)
 
     # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=4,LINKS_CU=1)
@@ -807,21 +813,21 @@ def plot_switch():
     # plot(tab, 's-8dir-xbar','-',1, 32)
     tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=1,LINKS_CU=4)
     plot(tab, 'v-db','-',512)
-    tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=1,LINKS_CU=4)
-    plot(tab, 's-db','-',32)
-    tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=1,LINKS_CU=4)
-    plot(tab, 'v-cd','--',512)
-    tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=1,LINKS_CU=4)
-    plot(tab, 's-cd','--',32)
+    # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=1,LINKS_CU=4)
+    # plot(tab, 's-db','-',32)
+    # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=1,LINKS_CU=4)
+    # plot(tab, 'v-cd','--',512)
+    # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=1,LINKS_CU=4)
+    # plot(tab, 's-cd','--',32)
 
-    plt.tight_layout()
-    ax1.set_xlabel('Number of static links between switches')
-    ax2.set_xlabel('Number of static links between switches')
-    ax1.set_ylabel('Area ($um^2$)')
+    # plt.tight_layout()
+    # ax1.set_xlabel('Number of static links between switches')
+    # ax2.set_xlabel('Number of static links between switches')
+    ax1.set_ylabel('Area ($mm^2$)')
     ax2.set_ylabel('Energy (fJ/bit)')
     ax1.legend(loc=2, ncol=2, fontsize='x-small')
     plt.gcf().subplots_adjust(left=0.12,bottom=0.12)
-    fig.set_size_inches(8,4)
+    fig.set_size_inches(4,4)
     plot_path = 'figs/switch.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900)
     print('Generate {}'.format(plot_path))
@@ -847,8 +853,14 @@ def gen_router():
 
 def plot_area():
     colors = getcolors("Paired", 8)[0:5]
-    tps = ['total_pcu_area', 'total_pmu_area', 'total_router_area', 'total_vswitch_area', 'total_sswitch_area'] 
-    cols = [d for d in designs if d['net'] not in ["p2p", "asic"]]
+    tps = ['total_pcu_area', 'total_pmu_area', 'total_router_area', 'total_vswitch_area', 'total_sswitch_area']
+    tps_name = {'total_pcu_area':'PCU', 'total_pmu_area':'PMU', 'total_router_area':'Router',
+            'total_vswitch_area':'VSwitch', 'total_sswitch_area':'SSwitch'}
+    print designs
+    for d in designs:
+        d.setdefault("link-prop", "db")
+    print designs
+    cols = [d for d in designs if d['net'] not in ["p2p", "asic"] and d['link-prop'] not in ["cd"]]
     names = [netname(col) for col in cols]
 
     fig, ax = plt.subplots()
@@ -864,16 +876,16 @@ def plot_area():
         for col in cols:
             areas.append(get_col_value(summary['area'] / 1e6, tp, **col))
         areas = np.array(areas)
-        ax.bar(inds, np.array(areas), bottom=bottom, width=barwidth, edgecolor='none', label=tp)
+        ax.bar(inds, np.array(areas), bottom=bottom, width=barwidth, edgecolor='none', label=tps_name[tp])
         bottom += areas 
 
     ax.set_xticks(inds)
     ax.set_xticklabels(names, rotation=40)
-    ax.set_xlabel('Network Architectures')
+    # ax.set_xlabel('Network Architectures')
     ax.set_ylabel('Area ($mm^2$)')
     ax.set_ylim(0,max(bottom)*1.2)
-    ax.legend(loc=2, ncol=5, fontsize='x-small')
-    fig.set_size_inches(7,4)
+    ax.legend(loc=2, ncol=5)
+    fig.set_size_inches(7,7)
     plt.gcf().subplots_adjust(bottom=0.2)
     plot_path = 'figs/area.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900)
