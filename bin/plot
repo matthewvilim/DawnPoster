@@ -21,6 +21,35 @@ import pandas as pd
 from summarize import *
 from itertools import groupby 
 
+def stanford_colors(*names):
+    d = {
+        "Cardinal Red":"#8c1515",
+        "Sandstone":"#d2c295",
+        "White":"#ffffff",
+        "Black":"#2e2d29",
+        "Warm Grey":"#3f3c30",
+        "Cool Grey":"#4d4f53",
+        "Beige":"#9d9573",
+        "Light Sage":"#c7d1c5",
+        "Clay":"#5f574f",
+        "Cloud":"#dad7cb",
+        "Driftwood":"#b6b1a9",
+        "Stone":"#928b81",
+        "Sandhill":"#b3995d",
+        "Palo Alto":"#175e54",
+        "Teal":"#00505c",
+        "Purple":"#53284f",
+        "Redwood":"#8d3c1e",
+        "Brown":"#5e3032",
+        "Sky":"#0098db",
+        "Lagunita":"#007c92",
+        "Mint":"#009b76",
+        "Gold":"#b26f16",
+        "Sun":"#eaab00",
+        "Poppy":"#e98300"
+    }
+    return [d[n] for n in names]
+
 def getcolors(name,num):
     cmap = plt.cm.get_cmap(name,num)
     return [cmap(i) for i in range(num)]
@@ -94,7 +123,8 @@ def plot_sim():
     appnames = get_idx_value(summary["sim"], "appname")
     cols = designs
     labels = [netname(c) for c in cols] 
-    colors = getcolors("Paired", 11)[0:len(cols)]
+    # colors = getcolors("Paired", 11)[0:len(cols)]
+    colors = stanford_colors("Mint", "Poppy", "Sun", "Sky", "Sandstone")
 
     # fig, (ax1,ax2,ax3,ax4) = plt.subplots(4,1,sharex=True)
     fig, (ax1,ax3) = plt.subplots(2,1,sharex=True)
@@ -270,7 +300,8 @@ def plot_vc_area():
     appnames = get_idx_value(summary["sim"], "appname")
     cols = [ d for d in designs if d['net']=='dynamic']
     labels = [netname(c) for c in cols]
-    colors = getcolors("Paired", 8)[0:len(cols)]
+    # colors = getcolors("Paired", 8)[0:len(cols)]
+    colors = stanford_colors("Stone","Sandhill", "Mint")
 
     fig, (ax1,ax2) = plt.subplots(1,2, gridspec_kw = {'width_ratios':[1.5, 1]})
     plt.tight_layout()
@@ -832,7 +863,7 @@ def plot_switch():
     ax1.legend(loc=2, ncol=2, fontsize='x-small')
     ax1.legend(loc=2, ncol=1, fontsize='x-small')
     plt.gcf().subplots_adjust(left=0.15,bottom=0.22,wspace=0.35, right=0.95)
-    fig.set_size_inches(6,2)
+    fig.set_size_inches(4,2)
     plot_path = 'figs/switch.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900)
     print('Generate {}'.format(plot_path))
