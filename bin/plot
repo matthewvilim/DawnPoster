@@ -301,7 +301,7 @@ def plot_vc_area():
     cols = [ d for d in designs if d['net']=='dynamic']
     labels = [netname(c) for c in cols]
     # colors = getcolors("Paired", 8)[0:len(cols)]
-    colors = stanford_colors("Stone","Sandhill", "Mint")
+    colors = stanford_colors("Stone","Sun", "Mint")
 
     fig, (ax1,ax2) = plt.subplots(1,2, gridspec_kw = {'width_ratios':[1.5, 1]})
     plt.tight_layout()
@@ -330,7 +330,8 @@ def plot_vc_area():
     # plot_path = 'figs/vc.pdf'
     # plt.savefig(plot_path, format='pdf', dpi=900)
 
-    colors = getcolors("Paired", 8)[0:5]
+    # colors = getcolors("Paired", 8)[0:5]
+    colors = stanford_colors("Sun", "Mint", "Sandhill", "Sky", "Stone")
     tps = ['total_pcu_area', 'total_pmu_area', 'total_router_area', 'total_vswitch_area',
             'total_sswitch_area'] 
     tps_name = {'total_pcu_area':'PCU', 'total_pmu_area':'PMU', 'total_router_area':'Router',
@@ -813,11 +814,14 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
     return texts
 
 def plot_switch():
+    colors = stanford_colors("Sun", "Mint")
     fig, (ax1, ax2) = plt.subplots(1,2, sharex=True)
     ax1.set_axisbelow(True)
     ax1.yaxis.grid(color='gray', linestyle='dashed')
+    ax1.set_prop_cycle(cycler('color', colors))
     ax2.set_axisbelow(True)
     ax2.yaxis.grid(color='gray', linestyle='dashed')
+    ax2.set_prop_cycle(cycler('color', colors))
     fig.add_subplot(111, frameon=False)
     # hide tick and tick label of the big axes
     plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
