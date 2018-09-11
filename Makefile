@@ -1,4 +1,4 @@
-PAPER = poster
+PAPER = poster2
 TEX = $(wildcard *.tex text/*.tex)
 BIB = references.bib
 FIGS = $(wildcard figs/*.pdf figs/*.png graphs/*.pdf graphs/*.png)
@@ -7,10 +7,10 @@ FIGS = $(wildcard figs/*.pdf figs/*.png graphs/*.pdf graphs/*.png)
 
 $(PAPER).pdf: $(TEX) $(BIB) $(FIGS)
 	echo $(FIGS)
-	pdflatex $(PAPER)
-	bibtex $(PAPER)
-	pdflatex $(PAPER)
-	pdflatex $(PAPER)
+	xelatex $(PAPER)
+	#bibtex $(PAPER)
+	#lualatex $(PAPER)
+	#lualatex $(PAPER)
 
 # figs/speedupbars.tex: figs/speedupbars.gp figs/speedupbars.dat
 # 	cd figs && gnuplot speedupbars.gp
