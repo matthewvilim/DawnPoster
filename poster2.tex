@@ -92,7 +92,7 @@
 
 \head{Increasing Dynamism in Plasticine}{\auth{Alexander Rucker}{acrucker@stanford.edu}\and\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Matthew Vilim}{mvilim@stanford.edu}}
 
-\splitcol{0.3333\columnwidth}{
+\splitcol{0.3\columnwidth}{
   \rulebox{Background}{
     \emph{Plasticine} a vectorized Coarse-Grained Reconfigurable Array with
     \begin{itemize}
@@ -102,37 +102,42 @@
     \end{itemize}
     \emph{Plasticine} demonstrated an average speedup of XXX and XXX times performance per watt than an FPGA.
   }
-    \bigidea{How can we retain Plasticine's performance and efficiency while enabling new classes of applications?}
+    \bigidea{How can we retain Plasticine's performance and efficiency while enabling new applications?}
   \rulebox{Compiler \& Mapping Flow}{
     \centering
-    \includegraphics[width=1\linewidth]{figs/flow.pdf}\\
-    \includegraphics[width=1\linewidth]{figs/mapping.pdf}\\
+    \includegraphics[width=0.8\linewidth]{figs/flow.pdf}\\
+    \includegraphics[width=0.8\linewidth]{figs/mapping.pdf}\\
   }
 }
-\splitcol{0.6666\columnwidth}{
+\splitcol{0.4\columnwidth}{
   \rulebox{Hybrid Networks}{
   }
-  \splitcol{0.49\columnwidth}{
+  \splitcol{1\columnwidth}{
     \textbox{
       \includegraphics[width=1\linewidth]{figs/link5.pdf}\\
     }
   }
-  \splitcol{0.24\columnwidth}{
+  \splitcol{0.49\columnwidth}{
     \textbox{
       \includegraphics[width=1\linewidth]{figs/area.pdf}\\
     }
   }
-  \splitcol{0.24\columnwidth}{
+  \splitcol{0.49\columnwidth}{
     \centering
     \includegraphics[width=1\linewidth]{figs/switch.pdf}\\
-    %\begin{tabular}{cccc}
-      %\#VC & Buffer Slots & Area ($\mu m^2$) & Energy($fJ$/bit) \\\hline
-      %\input{text/router.tex}
-    %\end{tabular}\\
+    \begin{tabular}{cccc}
+      \#VC & Buffer Slots & Area ($\mu m^2$) & Energy($fJ$/bit) \\\hline
+      \input{text/router.tex}
+    \end{tabular}\\
   }
   \centering
-  \includegraphics[width=1\linewidth]{figs/slow_down.pdf}\\
-  \splitcol{0.5\columnwidth}{
+  \splitcol{1\columnwidth}{
+    \textbox{
+      Put key points of hybrid network paper here
+    }
+  }
+  \splitcol{1\columnwidth}{
+    \includegraphics[width=1\linewidth]{figs/slow_down.pdf}\\
   }
   %\splitcol{0.5\columnwidth}{
     %\centering
@@ -147,6 +152,13 @@
       %\includegraphics[width=1\linewidth]{figs/area.pdf}\\
     %}
   %}
+}
+\splitcol{0.3\columnwidth}{
+  \rulebox{Future Work}{
+    \blindtext
+    \blindtext
+    \blindtext
+  }
 }
 
 \end{document}
