@@ -96,7 +96,8 @@ def plot_sim():
     labels = [netname(c) for c in cols] 
     colors = getcolors("Paired", 11)[0:len(cols)]
 
-    fig, (ax1,ax2,ax3,ax4) = plt.subplots(4,1,sharex=True)
+    # fig, (ax1,ax2,ax3,ax4) = plt.subplots(4,1,sharex=True)
+    fig, (ax1,ax3) = plt.subplots(2,1,sharex=True)
     plt.tight_layout()
     width = 0.8
     maxY = 2
@@ -107,9 +108,10 @@ def plot_sim():
 
     def text_over_max(ax, inds, i, y, maxY):
         for ind,yy in zip(inds,y):
+            yy = round(yy, ndigits=1)
             if yy > maxY:
-                ax.text(ind+i*barwidth-barwidth/2, maxY+0.1, round(yy, ndigits=1), 
-                        color='k', size='x-small')
+                ax.text(ind+i*barwidth-barwidth/2, maxY+0.1, yy, 
+                        color='k', size='xx-small')
 
     sds = []
     p2p_cycles = get_col(summary['sim'], 'cycle', **p2p_ideal)
@@ -126,25 +128,25 @@ def plot_sim():
         ax1.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
         text_over_max(ax1, inds, i, y, maxY)
     ax1.set_xticks(xticks)
-    ax1.set_ylabel('(a)\nSlow down compared \nto ideal newtork')
+    ax1.set_ylabel('Slow down compared \nto ideal newtork')
     ax1.set_xlim(0,len(appnames)+1)
     ax1.set_ylim(0,maxY)
-    ax1.legend(loc=2, ncol=4, fontsize='x-small')
+    ax1.legend(loc=2, ncol=2, fontsize='x-small')
 
-    ax2.set_axisbelow(True)
-    ax2.yaxis.grid(color='gray', linestyle='dashed')
-    v2_s4_area = get_col_value(summary['area'], 'total_area', **v2_s4)
-    for i,c in enumerate(cols):
-        c_area = get_col_value(summary['area'], 'total_area', **c)
-        y = sds[i] * (c_area / v2_s4_area)
-        y = np.append(y, geomean(y))
-        # if c == D_v1_s4: print(c_area / v2_s4_area)
-        ax2.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
-        text_over_max(ax2, inds, i, y, maxY)
-    ax2.set_xticks(xticks)
-    ax2.set_ylabel('(b)\nSlow down\n (Normallized by \nTotal Area)')
-    ax2.set_xlim(0,len(appnames)+1)
-    ax2.set_ylim(0,maxY)
+    # ax2.set_axisbelow(True)
+    # ax2.yaxis.grid(color='gray', linestyle='dashed')
+    # v2_s4_area = get_col_value(summary['area'], 'total_area', **v2_s4)
+    # for i,c in enumerate(cols):
+        # c_area = get_col_value(summary['area'], 'total_area', **c)
+        # y = sds[i] * (c_area / v2_s4_area)
+        # y = np.append(y, geomean(y))
+        # # if c == D_v1_s4: print(c_area / v2_s4_area)
+        # ax2.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
+        # text_over_max(ax2, inds, i, y, maxY)
+    # ax2.set_xticks(xticks)
+    # ax2.set_ylabel('(b)\nSlow down\n (Normallized by \nTotal Area)')
+    # ax2.set_xlim(0,len(appnames)+1)
+    # ax2.set_ylim(0,maxY)
 
     ax3.set_axisbelow(True)
     ax3.yaxis.grid(color='gray', linestyle='dashed')
@@ -161,7 +163,7 @@ def plot_sim():
         text_over_max(ax3, inds, i, y, maxY)
     ax3.set_xticks(xticks)
     ax3.set_xlabel('Benchmarks')
-    ax3.set_ylabel('(c)\nNormalized \nNetwork Energy \nto v2-s4-db')
+    ax3.set_ylabel('Normalized \nNetwork Energy \nto v2-s4-db')
     ax3.set_xticklabels(appnames, rotation=40)
     ax3.set_xlim(0,len(appnames)+1)
     ax3.set_ylim(0,maxY)
@@ -191,41 +193,41 @@ def plot_sim():
     # ax4.set_xlim(0,len(appnames)+1)
     # ax4.set_ylim(0,maxY)
 
-    ax4.set_axisbelow(True)
-    ax4.yaxis.grid(color='gray', linestyle='dashed')
-    hatches = {'total_router_energy': '//', 'total_vswitch_energy':'', 'total_sswitch_energy':'\\\\'}
-    v2_s4_power = get_col(summary['energy'], 'total_net_energy', **v2_s4) * 1e9 / get_col(summary['sim'], 'cycle', **v2_s4)
-    for i,c in enumerate(cols):
-        bottom = np.zeros(len(appnames)+1)
-        for e in ['total_vswitch_energy', 'total_sswitch_energy', 'total_router_energy']:
-            c_power = get_col(summary['energy'], e, **c) * 1e9 / get_col(summary['sim'], 'cycle', **c)
-            y = c_power / v2_s4_power
-            y = np.append(y, geomean(y))
-            ax4.bar(inds+i*barwidth, y, bottom=bottom, width=barwidth, edgecolor='none',
-                    color=colors[i], hatch=hatches[e])
-            bottom += y
-        text_over_max(ax4, inds, i, y, maxY)
-        if c == v2_s4:
-            total_energy = get_col(summary['energy'], 'total_net_energy', **c)
-            total_power = get_col(summary['energy'], 'total_net_power', **c)
-            for ind,yy in zip(inds,total_power):
-                ax4.text(ind+i*barwidth-barwidth/2, 1.2, '{} W'.format(round(yy, ndigits=2)), color='k', size='x-small')
-    ax4.set_xticks(xticks)
-    ax4.set_xlabel('Benchmarks')
-    ax4.set_ylabel('(d)\nNormalized \nNetwork Power \nto v2-s4-db')
-    ax4.set_xticklabels(np.append(appnames, 'Geometric Mean'), rotation=40)
-    ax4.set_xlim(0,len(appnames)+1)
-    ax4.set_ylim(0,maxY)
-    # fake customized labels
-    power_labels = {'total_router_energy': 'total_router power', 'total_vswitch_energy':'vector switch power',
-            'total_sswitch_energy':'scalar switch power'}
-    for e in hatches:
-        ax4.bar(inds+i*barwidth, [0]*len(inds), width=barwidth, edgecolor='k',color='w',
-                label=power_labels[e], hatch=hatches[e])
-    ax4.legend(loc=2, ncol=3, fontsize='x-small')
+    # ax4.set_axisbelow(True)
+    # ax4.yaxis.grid(color='gray', linestyle='dashed')
+    # hatches = {'total_router_energy': '//', 'total_vswitch_energy':'', 'total_sswitch_energy':'\\\\'}
+    # v2_s4_power = get_col(summary['energy'], 'total_net_energy', **v2_s4) * 1e9 / get_col(summary['sim'], 'cycle', **v2_s4)
+    # for i,c in enumerate(cols):
+        # bottom = np.zeros(len(appnames)+1)
+        # for e in ['total_vswitch_energy', 'total_sswitch_energy', 'total_router_energy']:
+            # c_power = get_col(summary['energy'], e, **c) * 1e9 / get_col(summary['sim'], 'cycle', **c)
+            # y = c_power / v2_s4_power
+            # y = np.append(y, geomean(y))
+            # ax4.bar(inds+i*barwidth, y, bottom=bottom, width=barwidth, edgecolor='none',
+                    # color=colors[i], hatch=hatches[e])
+            # bottom += y
+        # text_over_max(ax4, inds, i, y, maxY)
+        # if c == v2_s4:
+            # total_energy = get_col(summary['energy'], 'total_net_energy', **c)
+            # total_power = get_col(summary['energy'], 'total_net_power', **c)
+            # for ind,yy in zip(inds,total_power):
+                # ax4.text(ind+i*barwidth-barwidth/2, 1.2, '{} W'.format(round(yy, ndigits=2)), color='k', size='x-small')
+    # ax4.set_xticks(xticks)
+    # ax4.set_xlabel('Benchmarks')
+    # ax4.set_ylabel('(d)\nNormalized \nNetwork Power \nto v2-s4-db')
+    # ax4.set_xticklabels(np.append(appnames, 'Geometric Mean'), rotation=40)
+    # ax4.set_xlim(0,len(appnames)+1)
+    # ax4.set_ylim(0,maxY)
+    # # fake customized labels
+    # power_labels = {'total_router_energy': 'total_router power', 'total_vswitch_energy':'vector switch power',
+            # 'total_sswitch_energy':'scalar switch power'}
+    # for e in hatches:
+        # ax4.bar(inds+i*barwidth, [0]*len(inds), width=barwidth, edgecolor='k',color='w',
+                # label=power_labels[e], hatch=hatches[e])
+    # ax4.legend(loc=2, ncol=3, fontsize='x-small')
 
-    plt.gcf().subplots_adjust(bottom=0.15)
-    fig.set_size_inches(16,8)
+    plt.gcf().subplots_adjust(bottom=0.2, left=0.1)
+    fig.set_size_inches(10,4)
     plot_path = 'figs/slow_down.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900, transparent=True)
     print('Generate {}'.format(plot_path))
@@ -812,9 +814,9 @@ def plot_switch():
     # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=4,LINKS_CU=1)
     # plot(tab, 's-8dir-xbar','-',1, 32)
     tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=1,LINKS_CU=4)
-    plot(tab, 'v-db','-',512)
-    # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=1,LINKS_CU=4)
-    # plot(tab, 's-db','-',32)
+    plot(tab, 'Vector Switch','-',512)
+    tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=1,DIRS_CU=1,LINKS_CU=4)
+    plot(tab, 'Scalar Switch','-',32)
     # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=1,LINKS_CU=4)
     # plot(tab, 'v-cd','--',512)
     # tab = lookup(switchtb,sim_scalar=0,XBAR_FULL=1,DIRS_SW=4,BACKPRESSURE=0,DIRS_CU=1,LINKS_CU=4)
@@ -826,8 +828,9 @@ def plot_switch():
     ax1.set_ylabel('Area ($mm^2$)')
     ax2.set_ylabel('Energy (fJ/bit)')
     ax1.legend(loc=2, ncol=2, fontsize='x-small')
-    plt.gcf().subplots_adjust(left=0.12,bottom=0.12)
-    fig.set_size_inches(4,4)
+    ax1.legend(loc=2, ncol=1, fontsize='x-small')
+    plt.gcf().subplots_adjust(left=0.16,bottom=0.2,wspace=0.3)
+    fig.set_size_inches(6,3)
     plot_path = 'figs/switch.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900)
     print('Generate {}'.format(plot_path))
@@ -954,7 +957,7 @@ def main():
     # print(lookup(summary['energy'], appname='GDA', vlink=2)['DynHopsVec'])
     # exit()
 
-    get_geo_mean()
+    # get_geo_mean()
     plot_switch()
     gen_router()
     plot_vc()
@@ -962,10 +965,10 @@ def main():
     plot_vc_area()
     plot_util_bw()
     plot_sim()
-    plot_link1()
-    plot_link2()
-    plot_link3()
-    plot_link4()
+    # plot_link1()
+    # plot_link2()
+    # plot_link3()
+    # plot_link4()
     plot_link5()
     # plot_qs()
 
