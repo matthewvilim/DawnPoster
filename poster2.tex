@@ -51,6 +51,7 @@
       \parbox{\dimexpr0.95\columnwidth-0.5in}{\setlength{\parskip}{0.15in}\setlength{\partopsep}{0in}#1}
     }
 \newcommand{\rulebox}[2]{
+  \vskip0.5in
   \parbox{0.95\columnwidth}{
     \leavevmode{\Large
     \color{cardinal}
@@ -64,7 +65,8 @@
 \renewcommand{\emph}[1]{\textit{\color{cardinal}#1}}
 \newcommand{\subhead}[1]{\par\hskip-.25in\textbf{\color{cardinal}#1: }}
 \newcommand{\bigidea}[1]{\parbox{0.95\columnwidth}{
-  \centering\large\color{cardinal}\textbf{\textit{#1}}}\\[0.5\baselineskip]\par
+  %\centering\large\color{cardinal}\textbf{\textit{#1}}}\\[0.5\baselineskip]
+  \centering\large\color{cardinal}\textbf{\textit{#1}}}
 }
 \newcommand{\authbox}[1]{
   \begin{tabular}[t]{c}
@@ -97,7 +99,7 @@
 %\renewcommand\labelitemi{{\color{cardinal}\vrule height\dimexpr.7ex+0.125ex depth\dimexpr-.7ex+0.125ex width0.5em}}
 \begin{document}
 
-\head{Increasing Dynamism in Plasticine}{\auth{Alexander Rucker}{acrucker@stanford.edu}\and\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Matthew Vilim}{mvilim@stanford.edu}}\\[0.75in]
+\head{Increasing Dynamism in Plasticine}{\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Alexander Rucker}{acrucker@stanford.edu}\and \auth{Matthew Vilim}{mvilim@stanford.edu}}\\[0.25in]
 \splitcolh{0.3\columnwidth}{20in}{
   \rulebox{Background}{
     \emph{Plasticine} a vector Coarse-Grained Reconfigurable Array:
@@ -106,7 +108,7 @@
         \item Distributed 256-kByte memories
         \item DRAM controllers with tile load and scatter-gather support
     \end{itemize}
-    \emph{Plasticine} demonstrated an average speedup of XXX and XXX times performance per watt than an FPGA.
+    \emph{Plasticine} demonstrated up to 95x speedup vs. an FPGA, and 77 times performance per Watt.
   }
   \bigidea{How can we retain Plasticine's performance and efficiency while enabling new applications?}
   \rulebox{Compiler \& Mapping Flow}{
@@ -118,13 +120,15 @@
 }
 \splitcolh{0.4\columnwidth}{20in}{
   \rulebox{Hybrid Networks}{
+    \noindent Different applications have different link activation rates and fanouts:
+
     \centering
     \includegraphics[width=0.8\linewidth]{figs/link5.pdf}\\
     %\textbox{
-      \bigidea{How to improve link utilization given communication characteristics?}
+      \bigidea{How can we improve link utilization?}
       \begin{itemize}
           \item Use static network for high-bandwidth and broadcast links
-          \item Use dynamic network to encorage link sharing on low-activated links
+          \item Use dynamic network to encourage link sharing on low-activated links
           \item Specialize networks at different granularity
       \end{itemize}
     %}
@@ -162,9 +166,20 @@
 }
 \splitcolh{0.3\columnwidth}{20in}{
   \rulebox{Future Work}{
-    \blindtext
-    \blindtext
-    \blindtext
+    \vskip.1in
+    \bigidea{What's the next class of applications to target?}
+    \begin{itemize}
+        \item Transactional/online applications?
+        \item Streaming data analytics and networking?
+        \item Graph analytics?
+    \end{itemize}
+    \bigidea{What advances will be necessary to target these applications?}
+    \begin{itemize}
+        \item Enhanced support for data-dependent conditionals
+        \item Support for finite state machine-based control
+        \item Tightly integrated parsing support
+        \item Support for more complicated data structures
+    \end{itemize}
   }
 }
 
