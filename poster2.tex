@@ -27,7 +27,7 @@
 
 \usepackage{multicol}
 \setlength{\columnsep}{-0.00in}
-\setlength{\parskip}{0.8\baselineskip}
+\setlength{\parskip}{1.5\baselineskip}
 \setlength{\parindent}{0pt}
 
 \usepackage{microtype}
@@ -57,14 +57,13 @@
     %\leaders\hrule height.1ex depth\dimexpr-.1ex+4.0pt\hfill~}\\
       \leaders\hrule height\dimexpr.5ex+0.075ex depth\dimexpr-.5ex+0.075ex \hfill\hspace*{0pt}}\\[0.20in]
       \centering
-      \parbox{\dimexpr0.95\columnwidth-0.5in}{\setlength{\parskip}{0.15in}\setlength{\partopsep}{0in}#2}\\
+      \parbox{\dimexpr0.95\columnwidth-0.5in}{\setlength{\parskip}{0.15in}\setlength{\partopsep}{0in}#2}\\[0.25in]
     }\par}
 \renewcommand{\emph}[1]{\textit{\color{cardinal}#1}}
 \newcommand{\subhead}[1]{\par\hskip-.25in\textbf{\color{cardinal}#1: }}
 \newcommand{\bigidea}[1]{\parbox{0.95\columnwidth}{
-\\[0.5\baselineskip]
-  \centering\large\color{cardinal}\textbf{\textit{#1}}}
-\\[0.5\baselineskip]}
+  \centering\large\color{cardinal}\textbf{\textit{#1}}}\\[0.5\baselineskip]\par
+}
 \newcommand{\authbox}[1]{
   \begin{tabular}[t]{c}
     #1
