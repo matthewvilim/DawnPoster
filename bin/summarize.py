@@ -39,7 +39,7 @@ D_v1_s4_q16 = { "vlink":1, "slink":4, 'net':'dynamic', 'flit-width':512, 'psim-q
 designs = []
 designs.append(v3_s4)
 designs.append(v2_s4)
-designs.append(v3_s4_cd)
+# designs.append(v3_s4_cd)
 designs.append(D_v2_s4)
 # designs.append(D_v1_s4_f256)
 # designs.append({ "vlink":1, "slink":4, 'net':'dynamic', 'flit-width':512, 'psim-q':4, 'proute-q':1})
