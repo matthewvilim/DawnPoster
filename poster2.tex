@@ -87,7 +87,6 @@
 \newcommand{\auth}[2]{{\Large #1}\\\texttt{\large #2}}
 %\newcommand{\auth}[2]{\pbox[t]{5.0in}{{\Large {~\hfill#1\hfill~}}\\\texttt{~\hfill#2\hfill~}}}
 %\renewcommand\labelitemi{{\color{cardinal}\vrule height\dimexpr.7ex+0.125ex depth\dimexpr-.7ex+0.125ex width0.5em}}
-
 \begin{document}
 
 \head{Increasing Dynamism in Plasticine}{\auth{Alexander Rucker}{acrucker@stanford.edu}\and\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Matthew Vilim}{mvilim@stanford.edu}}
@@ -102,7 +101,7 @@
     \end{itemize}
     \emph{Plasticine} demonstrated an average speedup of XXX and XXX times performance per watt than an FPGA.
   }
-    \bigidea{How can we retain Plasticine's performance and efficiency while enabling new applications?}
+  \bigidea{How can we retain Plasticine's performance and efficiency while enabling new applications?}
   \rulebox{Compiler \& Mapping Flow}{
     \centering
     \includegraphics[width=0.8\linewidth]{figs/flow.pdf}\\
@@ -111,32 +110,28 @@
 }
 \splitcol{0.4\columnwidth}{
   \rulebox{Hybrid Networks}{
-  }
-  \splitcol{1\columnwidth}{
-    \textbox{
-      \includegraphics[width=1\linewidth]{figs/link5.pdf}\\
-    }
-  }
-  \splitcol{0.49\columnwidth}{
-    \textbox{
-      \includegraphics[width=1\linewidth]{figs/area.pdf}\\
-    }
-  }
-  \splitcol{0.49\columnwidth}{
     \centering
-    \includegraphics[width=1\linewidth]{figs/switch.pdf}\\
-    \begin{tabular}{cccc}
-      \#VC & Buffer Slots & Area ($\mu m^2$) & Energy($fJ$/bit) \\\hline
-      \input{text/router.tex}
-    \end{tabular}\\
-  }
-  \centering
-  \splitcol{1\columnwidth}{
+    \includegraphics[width=0.8\linewidth]{figs/link5.pdf}\\
     \textbox{
-      Put key points of hybrid network paper here
+      \bigidea{How to improve link utilization given communication characteristics?}
+      \begin{itemize}
+          \item Use static network for high-bandwidth and broadcast links
+          \item Use dynamic network to encorage link sharing on low-activated links
+      \end{itemize}
     }
-  }
-  \splitcol{1\columnwidth}{
+    \includegraphics[width=1\linewidth]{figs/area_vc.pdf}\\
+    \splitcol{0.5\columnwidth}{
+      \centering
+      \includegraphics[width=1\linewidth]{figs/switch.pdf}
+    }
+    \splitcol{0.35\columnwidth}{
+      \footnotesize
+      \begin{tabular}{cccc}
+        \#VC & Buffer Slots & Area ($\mu m^2$) & Energy($fJ$/bit) \\\hline
+        \input{text/router.tex}
+      \end{tabular}\\
+    }
+    \centering
     \includegraphics[width=1\linewidth]{figs/slow_down.pdf}\\
   }
   %\splitcol{0.5\columnwidth}{

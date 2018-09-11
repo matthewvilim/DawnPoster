@@ -164,7 +164,7 @@ def plot_sim():
     ax3.set_xticks(xticks)
     ax3.set_xlabel('Benchmarks')
     ax3.set_ylabel('Normalized \nNetwork Energy \nto v2-s4-db')
-    ax3.set_xticklabels(appnames, rotation=40)
+    ax3.set_xticklabels(np.append(appnames, 'Geo mean'), rotation=30)
     ax3.set_xlim(0,len(appnames)+1)
     ax3.set_ylim(0,maxY)
     # fake customized labels
@@ -227,7 +227,7 @@ def plot_sim():
     # ax4.legend(loc=2, ncol=3, fontsize='x-small')
 
     plt.gcf().subplots_adjust(bottom=0.2, left=0.1)
-    fig.set_size_inches(10,4)
+    fig.set_size_inches(10,3.5)
     plot_path = 'figs/slow_down.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900, transparent=True)
     print('Generate {}'.format(plot_path))
@@ -272,7 +272,7 @@ def plot_vc_area():
     labels = [netname(c) for c in cols]
     colors = getcolors("Paired", 8)[0:len(cols)]
 
-    fig, (ax1,ax2) = plt.subplots(1,2)
+    fig, (ax1,ax2) = plt.subplots(1,2, gridspec_kw = {'width_ratios':[1.5, 1]})
     plt.tight_layout()
     width = 0.6
     maxY = 7
@@ -287,13 +287,13 @@ def plot_vc_area():
         vc = get_col(summary['sim'], 'vc', **c)
         vcs = get_col(summary['sim'], "vc", **c)
         ax1.bar(inds+i*barwidth, vcs, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
-    ax1.set_xticks(xticks)
-    ax1.set_xticklabels(appnames, rotation=60)
+    ax1.set_xticks(xticks+0.5)
+    ax1.set_xticklabels(appnames, rotation=45, ha='right')
     ax1.set_xlabel('Benchmarks')
-    ax1.set_ylabel('(a) Number of VC')
+    ax1.set_ylabel('Number of VC')
     ax1.set_xlim(0,len(appnames))
     ax1.set_ylim(0,maxY)
-    ax1.legend(loc=2, ncol=2, fontsize='small')
+    ax1.legend(loc=2, ncol=2, fontsize='x-small')
     # plt.gcf().subplots_adjust(bottom=0.2)
     # fig.set_size_inches(8,4)
     # plot_path = 'figs/vc.pdf'
@@ -302,6 +302,8 @@ def plot_vc_area():
     colors = getcolors("Paired", 8)[0:5]
     tps = ['total_pcu_area', 'total_pmu_area', 'total_router_area', 'total_vswitch_area',
             'total_sswitch_area'] 
+    tps_name = {'total_pcu_area':'PCU', 'total_pmu_area':'PMU', 'total_router_area':'Router',
+            'total_vswitch_area':'Vector Switch', 'total_sswitch_area':'Scalar Switch'}
     cols = [d for d in designs if d['net'] not in ["p2p", "asic"]]
     names = [netname(col) for col in cols]
 
@@ -318,16 +320,17 @@ def plot_vc_area():
             areas.append(get_col_value(summary['area'] / 1e6, tp, **col))
         areas = np.array(areas)
         ax2.bar(inds, np.array(areas), bottom=bottom, width=barwidth, edgecolor='none',
-                label=tp.replace("total_",""))
+                label=tps_name[tp])
         bottom += areas 
 
     ax2.set_xticks(inds)
-    ax2.set_xticklabels(names, rotation=40)
+    ax2.set_xticklabels(names, rotation=45)
     ax2.set_xlabel('Network Architectures')
-    ax2.set_ylabel('(b) Area ($mm^2$)')
+    ax2.set_ylabel('Area ($mm^2$)')
     ax2.set_ylim(0,max(bottom)*1.2)
-    ax2.legend(loc=2, ncol=2, fontsize='small')
-    fig.set_size_inches(8,4)
+    ax2.legend(loc=2, ncol=3, fontsize='x-small')
+    plt.tick_params(bottom=False)
+    fig.set_size_inches(10,3)
     plt.gcf().subplots_adjust(bottom=0.3)
     plot_path = 'figs/area_vc.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900)
@@ -593,7 +596,7 @@ def plot_link5():
         y_labels.append(getname(app))
         rate_interp = np.interp(x_values, xs, rate)
         data.append(rate_interp)
-    ax1.set_xlabel("Percentage of Links")
+    ax1.set_xlabel("Links (%)")
 
     # ax1.set_yticks(y_ticks)
     # ax1.set_yticklabels(y_labels)
@@ -617,7 +620,7 @@ def plot_link5():
             ax=ax1,
             cmap=plt.get_cmap("PiYG", nbin), norm=norm,
             cbar_kw=dict(ticks=np.linspace(-100, 100, nbin+1), format=fmt),
-            cbarlabel="(a) Activation Rate"
+            cbarlabel="Activation Rate"
             )
     
     fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
@@ -643,7 +646,7 @@ def plot_link5():
     # ax2.set_xlim(0,30)
     # # ax2.set_ylim(0,100)
     # ax2.set_ylabel("Distribution of Link Fanout")
-    ax2.set_xlabel("Percentage of Links")
+    ax2.set_xlabel("Links (%)")
 
     data = np.array(data)
     
@@ -655,15 +658,15 @@ def plot_link5():
             ax=ax2,
             cmap=plt.get_cmap("PiYG", nbin+1), norm=norm,
             cbar_kw=dict(ticks=np.linspace(-30, 30, nbin+1), format=fmt),
-            cbarlabel="(b) Link Fanout"
+            cbarlabel="Link Fanout"
             )
     
     fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
     annotate_heatmap(im, valfmt=fmt, size=5, fontweight="bold", textcolors=["red", "black"])
 
-    plt.gcf().subplots_adjust(top=0.93, left=0.15, right=0.97)
+    plt.gcf().subplots_adjust(top=0.85, left=0.18, right=0.95, bottom=0.12)
 
-    fig.set_size_inches(8,4)
+    fig.set_size_inches(6,2.5)
     plot_path = 'figs/link5.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900)
     print('Generate {}'.format(plot_path))
@@ -786,10 +789,9 @@ def plot_switch():
     ax2.yaxis.grid(color='gray', linestyle='dashed')
     fig.add_subplot(111, frameon=False)
     # hide tick and tick label of the big axes
-    plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
+    plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
     plt.grid(False)
     plt.xlabel("Static Links Between Switches")
-
 
     switchtb = summary['model'].switchtb
     links = get_idx_value(switchtb, "LINKS_SW")
@@ -829,8 +831,8 @@ def plot_switch():
     ax2.set_ylabel('Energy (fJ/bit)')
     ax1.legend(loc=2, ncol=2, fontsize='x-small')
     ax1.legend(loc=2, ncol=1, fontsize='x-small')
-    plt.gcf().subplots_adjust(left=0.16,bottom=0.2,wspace=0.3)
-    fig.set_size_inches(6,3)
+    plt.gcf().subplots_adjust(left=0.15,bottom=0.22,wspace=0.35, right=0.95)
+    fig.set_size_inches(6,2)
     plot_path = 'figs/switch.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900)
     print('Generate {}'.format(plot_path))
@@ -858,12 +860,8 @@ def plot_area():
     colors = getcolors("Paired", 8)[0:5]
     tps = ['total_pcu_area', 'total_pmu_area', 'total_router_area', 'total_vswitch_area', 'total_sswitch_area']
     tps_name = {'total_pcu_area':'PCU', 'total_pmu_area':'PMU', 'total_router_area':'Router',
-            'total_vswitch_area':'VSwitch', 'total_sswitch_area':'SSwitch'}
-    print designs
-    for d in designs:
-        d.setdefault("link-prop", "db")
-    print designs
-    cols = [d for d in designs if d['net'] not in ["p2p", "asic"] and d['link-prop'] not in ["cd"]]
+            'total_vswitch_area':'Vector Switch', 'total_sswitch_area':'Scalar Switch'}
+    cols = [d for d in designs if d['net'] not in ["p2p", "asic"]]
     names = [netname(col) for col in cols]
 
     fig, ax = plt.subplots()
@@ -887,9 +885,9 @@ def plot_area():
     # ax.set_xlabel('Network Architectures')
     ax.set_ylabel('Area ($mm^2$)')
     ax.set_ylim(0,max(bottom)*1.2)
-    ax.legend(loc=2, ncol=5)
-    fig.set_size_inches(7,7)
-    plt.gcf().subplots_adjust(bottom=0.2)
+    ax.legend(loc=2, ncol=2)
+    fig.set_size_inches(4,4)
+    plt.gcf().subplots_adjust(bottom=0.15, left=0.2, right=0.95, top=0.95)
     plot_path = 'figs/area.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900)
     print('Generate {}'.format(plot_path))
@@ -960,10 +958,10 @@ def main():
     # get_geo_mean()
     plot_switch()
     gen_router()
-    plot_vc()
+    # plot_vc()
     plot_area()
     plot_vc_area()
-    plot_util_bw()
+    # plot_util_bw()
     plot_sim()
     # plot_link1()
     # plot_link2()
