@@ -19,11 +19,13 @@
 \setitemize{label={\color{cardinal}\vrule height\dimexpr.7ex+0.125ex depth\dimexpr-.7ex+0.125ex width0.5em},
             leftmargin=0pt,
             itemsep=-0.05in,
-            topsep=-0.15in}
+            topsep=-0.05in}
 \setenumerate{label={\color{cardinal}\arabic*},
             leftmargin=0pt,
             itemsep=-0.05in,
-            topsep=-0.15in}
+            topsep=-0.05in}
+\setlist{nosep,after=\vspace{0.4\baselineskip}}
+
 
 \usepackage{multicol}
 \setlength{\columnsep}{-0.00in}
@@ -84,16 +86,21 @@
     {#2}
   }
 }
+\newcommand{\splitcolh}[3]{
+  \parbox[c][#2][t]{#1}{
+    \setlength{\columnwidth}{#1}
+    {#3}
+  }
+}
 \newcommand{\auth}[2]{{\Large #1}\\\texttt{\large #2}}
 %\newcommand{\auth}[2]{\pbox[t]{5.0in}{{\Large {~\hfill#1\hfill~}}\\\texttt{~\hfill#2\hfill~}}}
 %\renewcommand\labelitemi{{\color{cardinal}\vrule height\dimexpr.7ex+0.125ex depth\dimexpr-.7ex+0.125ex width0.5em}}
 \begin{document}
 
-\head{Increasing Dynamism in Plasticine}{\auth{Alexander Rucker}{acrucker@stanford.edu}\and\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Matthew Vilim}{mvilim@stanford.edu}}
-
-\splitcol{0.3\columnwidth}{
+\head{Increasing Dynamism in Plasticine}{\auth{Alexander Rucker}{acrucker@stanford.edu}\and\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Matthew Vilim}{mvilim@stanford.edu}}\\[0.75in]
+\splitcolh{0.3\columnwidth}{20in}{
   \rulebox{Background}{
-    \emph{Plasticine} a vectorized Coarse-Grained Reconfigurable Array with
+    \emph{Plasticine} a vector Coarse-Grained Reconfigurable Array:
     \begin{itemize}
         \item 6-stage, 16-lane 32-bit floating point SIMD pipelines
         \item Distributed 256-kByte memories
@@ -106,10 +113,10 @@
     \centering
     \includegraphics[width=1\linewidth]{figs/flow3.pdf}\\
     \vspace{20pt}
-    \includegraphics[width=0.8\linewidth]{figs/mapping.pdf}\\
+    \includegraphics[width=1\linewidth]{figs/mapping.pdf}\\
   }
 }
-\splitcol{0.4\columnwidth}{
+\splitcolh{0.4\columnwidth}{20in}{
   \rulebox{Hybrid Networks}{
     \centering
     \includegraphics[width=0.8\linewidth]{figs/link5.pdf}\\
@@ -153,7 +160,7 @@
     %}
   %}
 }
-\splitcol{0.3\columnwidth}{
+\splitcolh{0.3\columnwidth}{20in}{
   \rulebox{Future Work}{
     \blindtext
     \blindtext
