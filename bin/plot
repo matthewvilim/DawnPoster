@@ -333,7 +333,7 @@ def plot_vc_area():
     # plt.savefig(plot_path, format='pdf', dpi=900)
 
     # colors = getcolors("Paired", 8)[0:5]
-    colors = stanford_colors("Sun", "Mint", "Sandhill", "Sky", "Stone")
+    colors = stanford_colors("Sun", "Mint", "Sandhill", "Sky", "Redwood")
     tps = ['total_pcu_area', 'total_pmu_area', 'total_router_area', 'total_vswitch_area',
             'total_sswitch_area'] 
     tps_name = {'total_pcu_area':'PCU', 'total_pmu_area':'PMU', 'total_router_area':'Router',
