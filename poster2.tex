@@ -108,6 +108,7 @@
         \item Distributed 256-kByte memories
         \item Memory controllers support dense and sparse DRAM access
     \end{itemize}
+    \vskip-.6in
     \emph{Plasticine} demonstrated up to 95x speedup and 77x performance per Watt vs. a Stratix V FPGA.
   }
   \bigidea{How can we retain Plasticine's performance and efficiency while enabling new applications?}
@@ -169,14 +170,14 @@
 
     \centering
     \includegraphics[width=0.9\linewidth]{figs/merge_unit.pdf}\\
-    \vskip-0.5in
+    \vskip-0.75in
 
     \raggedright
     Multi-way merge reduces memory traffic:
 
     \centering
     \includegraphics[width=0.7\linewidth]{figs/multi_pcu_merge.pdf}\\
-    \vskip0.25in
+    \vskip.75in
 
     \raggedright
     \bigidea{What's the next class of applications to target?}
@@ -185,14 +186,15 @@
         \item Streaming data analytics and networking?
         \item Graph analytics?
     \end{itemize}
-    \bigidea{What advances will be necessary to target these applications?}
-    Improve achieved compute density for more generic control constructs
+    \vskip.15in
+    \bigidea{What advances will be necessary to target these applications?}\\[.25in]
+    Improve achieved density for generic control constructs:
     \begin{itemize}
         \item Data-dependent conditionals
         \item Finite state machine-based control
         \item Parsing support
+        \item Support for more complicated data structures
     \end{itemize}
-    Support for more complicated data structures
   }
 }
 
