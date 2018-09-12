@@ -124,7 +124,8 @@ def plot_sim():
     cols = designs
     labels = [netname(c) for c in cols] 
     # colors = getcolors("Paired", 11)[0:len(cols)]
-    colors = stanford_colors("Mint", "Poppy", "Sun", "Sky", "Sandstone")
+    # colors = stanford_colors("Mint", "Poppy", "Sun", "Sky", "Sandstone")
+    colors = stanford_colors("Cardinal Red", "Sandstone", "Warm Grey", "Light Sage", "Beige")
 
     # fig, (ax1,ax2,ax3,ax4) = plt.subplots(4,1,sharex=True)
     fig, (ax1,ax3) = plt.subplots(2,1,sharex=True)
@@ -164,21 +165,6 @@ def plot_sim():
     ax1.set_ylim(0,maxY)
     ax1.legend(loc=2, ncol=2, fontsize='x-small')
 
-    # ax2.set_axisbelow(True)
-    # ax2.yaxis.grid(color='gray', linestyle='dashed')
-    # v2_s4_area = get_col_value(summary['area'], 'total_area', **v2_s4)
-    # for i,c in enumerate(cols):
-        # c_area = get_col_value(summary['area'], 'total_area', **c)
-        # y = sds[i] * (c_area / v2_s4_area)
-        # y = np.append(y, geomean(y))
-        # # if c == D_v1_s4: print(c_area / v2_s4_area)
-        # ax2.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
-        # text_over_max(ax2, inds, i, y, maxY)
-    # ax2.set_xticks(xticks)
-    # ax2.set_ylabel('(b)\nSlow down\n (Normallized by \nTotal Area)')
-    # ax2.set_xlim(0,len(appnames)+1)
-    # ax2.set_ylim(0,maxY)
-
     ax3.set_axisbelow(True)
     ax3.yaxis.grid(color='gray', linestyle='dashed')
     hatches = {'total_router_energy': '//', 'total_vswitch_energy':'', 'total_sswitch_energy':'\\\\'}
@@ -206,57 +192,6 @@ def plot_sim():
         ax3.bar(inds+i*barwidth, [0]*len(inds), width=barwidth, edgecolor='k',color='w',
                 label=energy_labels[e], hatch=hatches[e])
     ax3.legend(loc=2, ncol=3, fontsize='x-small')
-
-    # ax4.set_axisbelow(True)
-    # ax4.yaxis.grid(color='gray', linestyle='dashed')
-    # v2_s4_energy = get_col(summary['energy'], 'total_net_energy', **v2_s4)
-    # for i,c in enumerate(cols):
-        # c_cycles = get_col(summary['sim'], "cycle", **c)
-        # c_energy = get_col(summary['energy'], 'total_net_energy', **c)
-        # y = sds[i] * (c_energy / v2_s4_energy)
-        # y = np.append(y, geomean(y))
-        # ax2.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
-        # ax4.bar(inds+i*barwidth, y, width=barwidth, edgecolor='none', color=colors[i], label=labels[i])
-        # text_over_max(ax4, inds, i, y, maxY)
-    # ax4.set_xticks(xticks)
-    # ax4.set_xlabel('Benchmarks')
-    # ax4.set_ylabel('(d)\nSlow down\n (Normallized by \nNetwork Energy)')
-    # ax4.set_xticklabels(np.append(appnames, 'Geometric Mean'), rotation=40)
-    # ax4.set_xlim(0,len(appnames)+1)
-    # ax4.set_ylim(0,maxY)
-
-    # ax4.set_axisbelow(True)
-    # ax4.yaxis.grid(color='gray', linestyle='dashed')
-    # hatches = {'total_router_energy': '//', 'total_vswitch_energy':'', 'total_sswitch_energy':'\\\\'}
-    # v2_s4_power = get_col(summary['energy'], 'total_net_energy', **v2_s4) * 1e9 / get_col(summary['sim'], 'cycle', **v2_s4)
-    # for i,c in enumerate(cols):
-        # bottom = np.zeros(len(appnames)+1)
-        # for e in ['total_vswitch_energy', 'total_sswitch_energy', 'total_router_energy']:
-            # c_power = get_col(summary['energy'], e, **c) * 1e9 / get_col(summary['sim'], 'cycle', **c)
-            # y = c_power / v2_s4_power
-            # y = np.append(y, geomean(y))
-            # ax4.bar(inds+i*barwidth, y, bottom=bottom, width=barwidth, edgecolor='none',
-                    # color=colors[i], hatch=hatches[e])
-            # bottom += y
-        # text_over_max(ax4, inds, i, y, maxY)
-        # if c == v2_s4:
-            # total_energy = get_col(summary['energy'], 'total_net_energy', **c)
-            # total_power = get_col(summary['energy'], 'total_net_power', **c)
-            # for ind,yy in zip(inds,total_power):
-                # ax4.text(ind+i*barwidth-barwidth/2, 1.2, '{} W'.format(round(yy, ndigits=2)), color='k', size='x-small')
-    # ax4.set_xticks(xticks)
-    # ax4.set_xlabel('Benchmarks')
-    # ax4.set_ylabel('(d)\nNormalized \nNetwork Power \nto v2-s4-db')
-    # ax4.set_xticklabels(np.append(appnames, 'Geometric Mean'), rotation=40)
-    # ax4.set_xlim(0,len(appnames)+1)
-    # ax4.set_ylim(0,maxY)
-    # # fake customized labels
-    # power_labels = {'total_router_energy': 'total_router power', 'total_vswitch_energy':'vector switch power',
-            # 'total_sswitch_energy':'scalar switch power'}
-    # for e in hatches:
-        # ax4.bar(inds+i*barwidth, [0]*len(inds), width=barwidth, edgecolor='k',color='w',
-                # label=power_labels[e], hatch=hatches[e])
-    # ax4.legend(loc=2, ncol=3, fontsize='x-small')
 
     plt.gcf().subplots_adjust(bottom=0.2, left=0.1)
     fig.set_size_inches(10,3.5)
@@ -303,7 +238,8 @@ def plot_vc_area():
     cols = [ d for d in designs if d['net']=='dynamic']
     labels = [netname(c) for c in cols]
     # colors = getcolors("Paired", 8)[0:len(cols)]
-    colors = stanford_colors("Stone","Sun", "Mint")
+    # colors = stanford_colors("Stone","Sun", "Mint")
+    colors = stanford_colors("Warm Grey", "Cardinal Red", "Sandstone")
 
     fig, (ax1,ax2) = plt.subplots(1,2, gridspec_kw = {'width_ratios':[1.5, 1]})
     plt.tight_layout()
@@ -333,7 +269,8 @@ def plot_vc_area():
     # plt.savefig(plot_path, format='pdf', dpi=900)
 
     # colors = getcolors("Paired", 8)[0:5]
-    colors = stanford_colors("Sun", "Mint", "Sandhill", "Sky", "Redwood")
+    # colors = stanford_colors("Sun", "Mint", "Sandhill", "Sky", "Redwood")
+    colors = stanford_colors("Cardinal Red", "Sandstone", "Warm Grey", "Light Sage", "Beige")
     tps = ['total_pcu_area', 'total_pmu_area', 'total_router_area', 'total_vswitch_area',
             'total_sswitch_area'] 
     tps_name = {'total_pcu_area':'PCU', 'total_pmu_area':'PMU', 'total_router_area':'Router',
@@ -594,15 +531,10 @@ def plot_link4():
     print('Generate {}'.format(plot_path))
 
 def plot_link5():
+    colors = stanford_colors("Cardinal Red", "White", "Sandstone")
     appnames = get_idx_value(summary["sim"], "appname")
     fig, (ax1,ax2) = plt.subplots(1, 2, sharey=True)
     plt.tight_layout()
-
-    colors = getcolors("tab20", 8)
-    linestyle = ['-','--']
-    cs, ls = combo(colors,linestyle)
-    cs = cs[0:len(appnames)]
-    ls = ls[0:len(appnames)]
 
     y_max = 300
     step = y_max/(2*len(appnames))
@@ -613,7 +545,6 @@ def plot_link5():
     x_values = np.linspace(0,100,10)
     y_ticks  = np.arange(len(appnames))
 
-    usage_colors = getcolors("tab20", len(appnames))
     for i, app in enumerate(summary['link_count']):
         tab = lookup(summary['sim'], **p2p_ideal)
         p2p_cycles = get_col_value(tab, 'cycle', app=app)
@@ -647,18 +578,20 @@ def plot_link5():
     data = np.array(data)
     
     nbin = 10
+    # cmap = plt.get_cmap("BrBG", nbin)
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("stanford", colors, nbin)
     norm = matplotlib.colors.BoundaryNorm(range(-100,100,200/nbin), nbin)
     fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
     
     im, _ = heatmap(data, row_labels=y_labels, col_labels=range(10,110,10), 
             ax=ax1,
-            cmap=plt.get_cmap("BrBG", nbin), norm=norm,
+            cmap=cmap, norm=norm,
             cbar_kw=dict(ticks=np.linspace(-100, 100, nbin+1), format=fmt),
             cbarlabel="Activation Rate"
             )
     
     fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
-    annotate_heatmap(im, valfmt=fmt, size=5, fontweight="bold", textcolors=["red", "black"])
+    annotate_heatmap(im, valfmt=fmt, size=5, fontweight="bold", textcolors=["black", "black"])
 
     data = []
     y_labels = []
@@ -679,24 +612,26 @@ def plot_link5():
 
     data = np.array(data)
     
-    nbin = 11
+    nbin = 10
+    # cmap = plt.get_cmap("BrBG", nbin)
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("stanford", colors, nbin)
     norm = matplotlib.colors.BoundaryNorm(range(-30, 30, 60/nbin), nbin)
     fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
     
     im, _ = heatmap(data, row_labels=None, col_labels=range(10,110,10), 
             ax=ax2,
-            cmap=plt.get_cmap("BrBG", nbin+1), norm=norm,
+            cmap=cmap, norm=norm,
             cbar_kw=dict(ticks=np.linspace(-30, 30, nbin+1), format=fmt),
             cbarlabel="Link Fanout"
             )
     
     fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
-    annotate_heatmap(im, valfmt=fmt, size=5, fontweight="bold", textcolors=["red", "black"])
+    annotate_heatmap(im, valfmt=fmt, size=5, fontweight="bold", textcolors=["black", "black"])
 
     xlim = ax2.get_xlim()
     ylim = ax2.get_ylim()
-    ax2.scatter([-10], [-10], marker='s', color='peru', label="Scalar")
-    ax2.scatter([-10], [-10], marker='s', color='lightseagreen', label="Vector")
+    ax2.scatter([-10], [-10], marker='s', color=colors[0], label="Scalar")
+    ax2.scatter([-10], [-10], marker='s', color=colors[-1], label="Vector")
     ax2.set_xlim(xlim)
     ax2.set_ylim(ylim)
     ax2.legend(ncol=1, fontsize='x-small', loc='center left', bbox_to_anchor=(1.4, 0.5))
@@ -819,7 +754,8 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
     return texts
 
 def plot_switch():
-    colors = stanford_colors("Sun", "Mint")
+    # colors = stanford_colors("Sun", "Mint")
+    colors = stanford_colors("Cardinal Red", "Sandstone")
     fig, (ax1, ax2) = plt.subplots(1,2, sharex=True)
     ax1.set_axisbelow(True)
     ax1.yaxis.grid(color='gray', linestyle='dashed')
@@ -988,27 +924,12 @@ def main():
     global summary
     summary = init()
 
-    # print(get_switch_spec(vec=True, **v2_s4))
-    # print(get_switch_spec(vec=True, **D_v2_s4))
-    # # print(lookup(summary['switchtb'], sim_scalar=0, XBAR_FULL=1, DIRS_CU=1,LINKS_CU=4,
-        # # BACKPRESSURE=1))
-    # print(lookup(summary['energy'], appname='GDA', vlink=2)['DynHopsVec'])
-    # exit()
-
-    # get_geo_mean()
-    plot_switch()
-    gen_router()
-    # plot_vc()
-    plot_area()
-    plot_vc_area()
-    # plot_util_bw()
+    # plot_switch()
+    # gen_router()
+    # plot_area()
+    # plot_vc_area()
     # plot_sim()
-    # plot_link1()
-    # plot_link2()
-    # plot_link3()
-    # plot_link4()
     plot_link5()
-    # plot_qs()
 
 if __name__ == "__main__":
     main()
