@@ -674,10 +674,6 @@ def plot_link5():
         multi_interp = np.interp(x_values, xs, multi)
         data.append(multi_interp)
 
-    # ax2.plot(xs, multicasts, label=getname(app))
-    # ax2.legend(loc=1, ncol=3, fontsize='x-small')
-    # ax2.set_xlim(0,30)
-    # # ax2.set_ylim(0,100)
     # ax2.set_ylabel("Distribution of Link Fanout")
     ax2.set_xlabel("Links (%)")
 
@@ -697,15 +693,17 @@ def plot_link5():
     fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
     annotate_heatmap(im, valfmt=fmt, size=5, fontweight="bold", textcolors=["red", "black"])
 
-    # ax2.set_xlim(0,1)
-    # ax2.set_ylim(0,1)
-    # ax2.scatter([-10], [-10], marker='s', color='peru', label="Scalar")
-    # ax2.scatter([-10], [-10], marker='s', color='peru', label="Vector")
-    # ax2.legend(ncol=3, fontsize='x-small', loc='lower right')
+    xlim = ax2.get_xlim()
+    ylim = ax2.get_ylim()
+    ax2.scatter([-10], [-10], marker='s', color='peru', label="Scalar")
+    ax2.scatter([-10], [-10], marker='s', color='lightseagreen', label="Vector")
+    ax2.set_xlim(xlim)
+    ax2.set_ylim(ylim)
+    ax2.legend(ncol=1, fontsize='x-small', loc='center left', bbox_to_anchor=(1.4, 0.5))
 
-    plt.gcf().subplots_adjust(top=0.85, left=0.18, right=0.95, bottom=0.12)
+    plt.gcf().subplots_adjust(top=0.85, left=0.18, right=0.83, bottom=0.12, wspace=0.3)
 
-    fig.set_size_inches(6,2.5)
+    fig.set_size_inches(8,3)
     plot_path = 'figs/link5.pdf'
     plt.savefig(plot_path, format='pdf', dpi=900)
     print('Generate {}'.format(plot_path))
@@ -1004,7 +1002,7 @@ def main():
     plot_area()
     plot_vc_area()
     # plot_util_bw()
-    plot_sim()
+    # plot_sim()
     # plot_link1()
     # plot_link2()
     # plot_link3()
