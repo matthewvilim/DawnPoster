@@ -652,7 +652,7 @@ def plot_link5():
     
     im, _ = heatmap(data, row_labels=y_labels, col_labels=range(10,110,10), 
             ax=ax1,
-            cmap=plt.get_cmap("PiYG", nbin), norm=norm,
+            cmap=plt.get_cmap("BrBG", nbin), norm=norm,
             cbar_kw=dict(ticks=np.linspace(-100, 100, nbin+1), format=fmt),
             cbarlabel="Activation Rate"
             )
@@ -662,7 +662,6 @@ def plot_link5():
 
     data = []
     y_labels = []
-    ax2.set_prop_cycle(cycler('color', cs) + cycler('linestyle', ls))
     for i, app in enumerate(summary['multicast']):
         multi_vec = sorted(np.array([] + summary['multicast'][app][2]), reverse=True)
         multi_scal = sorted(np.array(summary['multicast'][app][1] +
@@ -690,13 +689,19 @@ def plot_link5():
     
     im, _ = heatmap(data, row_labels=None, col_labels=range(10,110,10), 
             ax=ax2,
-            cmap=plt.get_cmap("PiYG", nbin+1), norm=norm,
+            cmap=plt.get_cmap("BrBG", nbin+1), norm=norm,
             cbar_kw=dict(ticks=np.linspace(-30, 30, nbin+1), format=fmt),
             cbarlabel="Link Fanout"
             )
     
     fmt = matplotlib.ticker.FuncFormatter(lambda x, pos: abs(int(x)))
     annotate_heatmap(im, valfmt=fmt, size=5, fontweight="bold", textcolors=["red", "black"])
+
+    # ax2.set_xlim(0,1)
+    # ax2.set_ylim(0,1)
+    # ax2.scatter([-10], [-10], marker='s', color='peru', label="Scalar")
+    # ax2.scatter([-10], [-10], marker='s', color='peru', label="Vector")
+    # ax2.legend(ncol=3, fontsize='x-small', loc='lower right')
 
     plt.gcf().subplots_adjust(top=0.85, left=0.18, right=0.95, bottom=0.12)
 

@@ -102,18 +102,18 @@
 \head{Increasing Dynamism in Plasticine}{\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Alexander Rucker}{acrucker@stanford.edu}\and \auth{Matthew Vilim}{mvilim@stanford.edu}}\\[0.25in]
 \splitcolh{0.3\columnwidth}{20in}{
   \rulebox{Background}{
-    \emph{Plasticine} a vector Coarse-Grained Reconfigurable Array:
+    \emph{Plasticine} - a vector Coarse-Grained Reconfigurable Array:
     \begin{itemize}
         \item 6-stage, 16-lane 32-bit floating point SIMD pipelines
         \item Distributed 256-kByte memories
-        \item DRAM controllers with tile load and scatter-gather support
+        \item Memory controllers support dense and sparse DRAM access
     \end{itemize}
-    \emph{Plasticine} demonstrated up to 95x speedup vs. an FPGA, and 77 times performance per Watt.
+    \emph{Plasticine} demonstrated up to 95x speedup and 77x performance per Watt vs. a Stratix V FPGA.
   }
   \bigidea{How can we retain Plasticine's performance and efficiency while enabling new applications?}
   \rulebox{Compiler \& Mapping Flow}{
     \centering
-    \includegraphics[width=1\linewidth]{figs/flow3.pdf}\\
+    \includegraphics[width=1\linewidth]{figs/flow4.pdf}\\
     \vspace{20pt}
     \includegraphics[width=1\linewidth]{figs/mapping.pdf}\\
   }
@@ -123,7 +123,7 @@
     \noindent Different applications have different link activation rates and fanouts:
 
     \centering
-    \includegraphics[width=0.8\linewidth]{figs/link5.pdf}\\
+    \includegraphics[width=1\linewidth]{figs/link5.pdf}\\
     %\textbox{
       \bigidea{How can we improve link utilization?}
       \begin{itemize}
@@ -187,12 +187,13 @@
         \item Graph analytics?
     \end{itemize}
     \bigidea{What advances will be necessary to target these applications?}
+    Improve achieved compute density for more generic control constructs
     \begin{itemize}
-        \item Enhanced support for data-dependent conditionals
-        \item Support for finite state machine-based control
-        \item Tightly integrated parsing support
-        \item Support for more complicated data structures
+        \item Data-dependent conditionals
+        \item Finite state machine-based control
+        \item Parsing support
     \end{itemize}
+    Support for more complicated data structures
   }
 }
 
