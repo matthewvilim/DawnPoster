@@ -102,7 +102,7 @@
 \head{Increasing Dynamism in Plasticine}{\auth{Yaqi Zhang}{yaqiz@stanford.edu}\and\auth{Alexander Rucker}{acrucker@stanford.edu}\and \auth{Matthew Vilim}{mvilim@stanford.edu}}\\[0.25in]
 \splitcolh{0.3\columnwidth}{20in}{
   \rulebox{Background}{
-    \emph{Plasticine} - a vector Coarse-Grained Reconfigurable Array:
+    \emph{Plasticine} is a vector Coarse-Grained Reconfigurable Array:
     \begin{itemize}
         \item 6-stage, 16-lane 32-bit floating point SIMD pipelines
         \item Distributed 256-kByte memories
@@ -121,14 +121,13 @@
 \splitcolh{0.4\columnwidth}{20in}{
   \rulebox{Hybrid Networks}{
     \noindent Different applications have different link activation rates and fanouts:
-
     \centering
     \includegraphics[width=1\linewidth]{figs/link5.pdf}\\
     %\textbox{
       \bigidea{How can we improve link utilization?}
       \begin{itemize}
           \item Use static network for high-bandwidth and broadcast links
-          \item Use dynamic network to encourage link sharing on low-activated links
+          \item Use dynamic network to encourage link sharing on low-activation links
           \item Specialize networks at different granularities
       \end{itemize}
     %}
